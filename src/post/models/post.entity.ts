@@ -22,10 +22,10 @@ export class PostEntity {
     content: string
         
     // latitude
-    @Column({type: 'decimal', precision: 10, scale: 5, default: 0.0})
+    @Column({type: 'decimal', precision: 10, scale: 7, default: 0.0})
     latitude: Double;
 
     // longitude
-    @Column({type: 'decimal', precision: 10, scale: 5, default: 0.0})
+    @Column({type: 'decimal', precision: 10, scale: 7, default: 0.0})
     longitude: Double;
 }
