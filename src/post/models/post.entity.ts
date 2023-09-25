@@ -3,7 +3,6 @@ import { Column, Double, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn} 
 
 @Entity()
 export class PostEntity {
-    // need id
     @PrimaryGeneratedColumn()
     postId: number;
     
