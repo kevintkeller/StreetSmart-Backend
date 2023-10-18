@@ -1,15 +1,16 @@
 import { Injectable, Post } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
 import { PostEntity } from '../models/post.entity';
 import { Repository } from 'typeorm';
 import { UserPost } from '../models/post.interface';
 import { Observable, map, switchMap, catchError, throwError, from } from 'rxjs';
 
+
 @Injectable()
 export class PostService {
 
     constructor(
-        @InjectRepository(PostEntity) private readonly postRepository: Repository<PostEntity>,
+        @InjectRepository(PostEntity) private readonly postRepository: Repository<PostEntity>
     ){}
 
     create(post: UserPost): Observable<void | UserPost> {
@@ -28,6 +29,10 @@ export class PostService {
             }),
             catchError(err => throwError(err))
         )
+    }
+
+    findOneBy(postId: number): any {
+        return this.postRepository.query("SELECT userEntityId FROM post_entity WHERE postId = " + postId);
     }
 
     // this one is done

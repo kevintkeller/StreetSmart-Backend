@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { PostService } from '../service/post.service';
 import { UserPost } from '../models/post.interface';
 import { Observable, catchError, map, of } from 'rxjs';
@@ -9,7 +9,6 @@ export class PostController {
 
     constructor(private postService: PostService){}
 
-    // create post (still need to create it in thes service)
     @Post()
     create(@Body()post: UserPost): Observable<UserPost | Object> {
         return this.postService.create(post).pipe(
@@ -17,6 +16,13 @@ export class PostController {
             catchError(err => of({error: err.message}))
         );
     }
+
+    @Get(':postId')
+    findOneBy(@Param()params: any) {
+        console.log(this.postService.findOneBy(params.postId));
+        return this.postService.findOneBy(params.postId);
+    }
+
 
     @Get()
     findAll(): Observable<PostEntity[]> {

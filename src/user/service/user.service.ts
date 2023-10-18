@@ -44,6 +44,10 @@ export class UserService {
         )
     }
 
+    findOneByUsername(user: any): any {
+        return this.userRepository.query("SELECT id FROM user_entity WHERE username = \"" + user + "\"");
+    }
+
     findAll(): Observable<User[]> {
         return from(this.userRepository.find()).pipe(
             map((users) => {
