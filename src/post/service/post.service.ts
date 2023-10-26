@@ -20,7 +20,7 @@ export class PostService {
         newPost.content = post.content;
         newPost.latitude = Number(post.latitude);
         newPost.longitude = Number(post.longitude);
-        newPost.userEntity = post.userId;
+        newPost.userId = post.userId;
         
         return from(this.postRepository.save(newPost)).pipe(
             map((post: PostEntity) => {

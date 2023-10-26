@@ -30,10 +30,9 @@ export class UserController {
         return this.userService.findOneBy(params.id);
     }
 
-    @Get()
-    findOneByUsername(@Body() user: any): any {
-        console.log("CURRENT USER:" + user);
-        return this.userService.findOneByUsername(user.username);
+    @Post('getUserByEmail')
+    findOneByUsername(@Body() user: any): Observable<Object[]> {
+        return this.userService.findOneByUsername(user.email);
     }
 
     @Get()

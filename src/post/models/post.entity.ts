@@ -1,15 +1,10 @@
 import { UserEntity } from "src/user/models/user.entity";
-import { Column, Double, Entity, JoinColumn, ManyToMany, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
+import { Column, Double, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn} from "typeorm";
 
 @Entity()
 export class PostEntity {
     @PrimaryGeneratedColumn()
     postId: number;
-    
-    // FOREIGN KEY need user id of post creator
-    // THIS MIGHT NOT BE RIGHT
-    @ManyToOne(() => UserEntity, (UserEntity) => UserEntity.id, { cascade: true})
-    userEntity: number;
     
     // title
     @Column()
@@ -27,4 +22,6 @@ export class PostEntity {
     @Column({type: 'decimal', precision: 10, scale: 7, default: 0.0})
     longitude: Double;
     
+    @Column()
+    userId: number;
 }
