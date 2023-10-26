@@ -1,5 +1,5 @@
-export interface UserPost {
-    postId?: number;
+export interface Report {
+    reportId?: number;
     title?: string;
     content?: string;
     latitude?: number;

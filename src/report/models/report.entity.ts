@@ -2,9 +2,9 @@ import { UserEntity } from "src/user/models/user.entity";
 import { Column, Double, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn} from "typeorm";
 
 @Entity()
-export class PostEntity {
+export class ReportEntity {
     @PrimaryGeneratedColumn()
-    postId: number;
+    reportId: number;
     
     // title
     @Column()

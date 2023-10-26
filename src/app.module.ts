@@ -6,8 +6,8 @@ import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { UserEntity } from './user/models/user.entity';
 import { AuthModule } from './auth/auth.module';
-import { PostModule } from './post/post.module';
-import { PostEntity } from './post/models/post.entity';
+import { ReportModule } from './report/report.module';
+import { ReportEntity } from './report/models/report.entity';
 
 @Module({
   imports: [
@@ -19,13 +19,13 @@ import { PostEntity } from './post/models/post.entity';
       username: 'KELLERKT5229',
       password: '7OIXBVME',
       database: 'cs485group6',
-      entities: [UserEntity, PostEntity],
+      entities: [UserEntity, ReportEntity],
       synchronize: true,
   }),
     ConfigModule.forRoot({isGlobal: true}),
     UserModule,
     AuthModule,
-    PostModule
+    ReportModule
   ],
   controllers: [AppController],
   providers: [AppService],
