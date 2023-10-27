@@ -1,17 +1,10 @@
 import { UserEntity } from "src/user/models/user.entity";
-import { Column, Double, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
+import { Column, Double, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn} from "typeorm";
 
 @Entity()
-export class PostEntity {
-    // need id
+export class ReportEntity {
     @PrimaryGeneratedColumn()
-    postId: number;
-    
-    // FOREIGN KEY need user id of post creator
-    // THIS MIGHT NOT BE RIGHT
-    @ManyToOne(type => UserEntity, userEntity => userEntity.id)
-    // might not need to be array
-    userEntity: number;
+    reportId: number;
     
     // title
     @Column()
@@ -19,7 +12,7 @@ export class PostEntity {
 
     // content
     @Column()
-    content: string
+    content: string;
         
     // latitude
     @Column({type: 'decimal', precision: 10, scale: 7, default: 0.0})
@@ -28,4 +21,7 @@ export class PostEntity {
     // longitude
     @Column({type: 'decimal', precision: 10, scale: 7, default: 0.0})
     longitude: Double;
+    
+    @Column()
+    userId: number;
 }
