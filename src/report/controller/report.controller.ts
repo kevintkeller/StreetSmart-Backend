@@ -19,7 +19,7 @@ export class ReportController {
 
     @Get(':reportId')
     findOneBy(@Param()params: any) {
-        return this.reportService.findOneBy(params.postId);
+        return this.reportService.findOneBy(params.reportId);
     }
 
     @Get()

@@ -4,6 +4,7 @@ import { UserController } from './controller/user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './models/user.entity';
 import { AuthModule } from 'src/auth/auth.module';
+import { AdminController } from './controller/admin.controller';
 
 @Module({
   imports: [
@@ -11,6 +12,6 @@ import { AuthModule } from 'src/auth/auth.module';
     AuthModule
   ],
   providers: [UserService],
-  controllers: [UserController]
+  controllers: [UserController, AdminController]
 })
 export class UserModule {}
