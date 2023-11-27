@@ -13,8 +13,10 @@ const bcrypt = require('bcrypt');
  * 
  * CONTENTS OF A JWT TOKEN:
  *      -Header: typically consists of two parts: the type of the token, which is JWT, and the signing algorithm being used, such as HMAC SHA256 or RSA
- *      -Payload (things we want to send): contains claims. Claims are statements about an entity (typically, the user) and additional data. There are three types of claims: registered, public, and private claims.
- *      -Signature: To create the signature part you have to take the encoded header, the encoded payload, a secret, the algorithm specified in the header, and sign that.
+ *      -Payload (things we want to send): contains claims. Claims are statements about an entity (typically, the user) and additional data.
+ *          There are three types of claims: registered, public, and private claims.
+ *      -Signature: To create the signature part you have to take the encoded header, the encoded payload, a secret, the algorithm specified in the header,
+ *          and sign that.
  */
 
 @Injectable()

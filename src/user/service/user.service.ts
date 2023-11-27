@@ -101,4 +101,8 @@ export class UserService {
     findByMail(email: string): Observable<User> {
         return from(this.userRepository.findOneBy({email}));
     }
+
+    getAdminFlg(id: number): any {
+        return this.userRepository.query("SELECT adminFlg FROM user_entity WHERE id = " + id);
+    }
 }
