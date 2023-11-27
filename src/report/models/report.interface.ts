@@ -5,4 +5,6 @@ export interface Report {
     latitude?: number;
     longitude?: number;
     userId?: number;
+    reportStatus?: number;
+    imageData?: string;
 }

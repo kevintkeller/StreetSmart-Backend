@@ -31,4 +31,11 @@ export class ReportController {
     deleteOne(@Param('reportId')reportId: string): Observable<Report> {
         return this.reportService.deleteOne(Number(reportId));
     }
+
+    @Post('updateReportStatus')
+    updateOne(@Body() report: any) {
+        console.log("hit");
+        this.reportService.updateOne(report.id, report.reportStatus);
+    }
+    
 }
