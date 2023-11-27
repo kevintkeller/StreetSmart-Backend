@@ -1,5 +1,5 @@
 import { Observable, catchError, map, of } from 'rxjs';
-import { Controller, Post, Body, Get, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Delete, Put, Query } from '@nestjs/common';
 import { UserService } from '../service/user.service';
 import { User } from '../models/user.interface';
 
@@ -25,10 +25,14 @@ export class UserController {
         )
     }
 
-
     @Get(':id')
     findOneBy(@Param() params: any): Observable<User> {
         return this.userService.findOneBy(params.id);
+    }
+
+    @Post('getUserByEmail')
+    findOneByUsername(@Body() user: any): Observable<Object[]> {
+        return this.userService.findOneByUsername(user.email);
     }
 
     @Get()

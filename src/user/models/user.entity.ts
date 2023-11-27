@@ -1,7 +1,5 @@
 import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-
-
 @Entity()
 export class UserEntity {
 
@@ -18,7 +16,7 @@ export class UserEntity {
     email: string;
 
     @Column()
-    password: string
+    password: string;
 
     @BeforeInsert()
     emailToLowerCase() {
