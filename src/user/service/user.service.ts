@@ -6,6 +6,7 @@ import { UserEntity } from '../models/user.entity';
 import { Repository } from 'typeorm';
 import { User } from '../models/user.interface';
 import { switchMap, map, catchError } from 'rxjs/operators';
+import { EMPTY } from 'rxjs';
 
 @Injectable()
 export class UserService {
@@ -23,13 +24,16 @@ export class UserService {
                 newUser.username = user.username;
                 newUser.email = user.email;
                 newUser.password = passwordHash;
+                newUser.adminFlg = 0;
 
                 return from(this.userRepository.save(newUser)).pipe(
                     map((user: User) => {
                         const {password, ...result} = user;
                         return result;
                     }),
-                    catchError(err => throwError(err))
+                    catchError((err, caught) => {
+                        return EMPTY;
+                    })
                 )
             })
         )

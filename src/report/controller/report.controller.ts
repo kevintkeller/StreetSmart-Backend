@@ -34,7 +34,6 @@ export class ReportController {
 
     @Post('updateReportStatus')
     updateOne(@Body() report: any) {
-        console.log("hit");
         this.reportService.updateOne(report.id, report.reportStatus);
     }
     
