@@ -18,6 +18,9 @@ export class UserEntity {
     @Column()
     password: string;
 
+    @Column()
+    adminFlg: number;
+
     @BeforeInsert()
     emailToLowerCase() {
         this.email = this.email.toLowerCase();

@@ -48,4 +48,8 @@ export class ReportService {
         );
     }
 
+    updateOne(id: number, reportStatus: number): any {
+        this.reportRepository.query("UPDATE report_entity SET reportStatus = " + reportStatus + " WHERE reportId = " + id);
+    }
+
 }
