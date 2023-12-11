@@ -3,7 +3,7 @@ import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
 import { ReportEntity } from '../models/report.entity';
 import { Repository } from 'typeorm';
 import { Report } from '../models/report.interface';
-import { Observable, map, switchMap, catchError, throwError, from } from 'rxjs';
+import { Observable, map, switchMap, catchError, throwError, from, EMPTY } from 'rxjs';
 
 
 @Injectable()
@@ -15,19 +15,27 @@ export class ReportService {
 
     create(report: Report): Observable<void | Report> {
 
+        console.log("service hit");
+
         const newReport = new ReportEntity();
         newReport.title = report.title;
         newReport.content = report.content;
         newReport.latitude = Number(report.latitude);
         newReport.longitude = Number(report.longitude);
         newReport.userId = report.userId;
+        newReport.reportStatus = 0;
+        newReport.imageData = report.imageData;
+        console.log(newReport);
         
         return from(this.reportRepository.save(newReport)).pipe(
-            map((post: ReportEntity) => {
-                const {...result} = post;
+            map((report: ReportEntity) => {
+                const {...result} = report;
                 return;
             }),
-            catchError(err => throwError(err))
+            catchError((err, caught) => {
+                console.log(err);
+                return EMPTY;
+            })
         )
     }
 
