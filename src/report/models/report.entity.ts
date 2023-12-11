@@ -1,6 +1,7 @@
 import { UserEntity } from "src/user/models/user.entity";
 import { Column, Double, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn} from "typeorm";
 
+
 @Entity()
 export class ReportEntity {
     @PrimaryGeneratedColumn()
@@ -24,6 +25,9 @@ export class ReportEntity {
     @Column()
     reportStatus: number;
 
-    @Column()
-    imageData: number;
+    @Column({
+        type: "longblob",
+
+    })
+    imageData: string;
 }
