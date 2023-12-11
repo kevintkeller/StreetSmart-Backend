@@ -11,6 +11,7 @@ export class ReportController {
 
     @Post()
     create(@Body()report: Report): Observable<Report | Object> {
+        //console.log("hit" + report.imageData);
         return this.reportService.create(report).pipe(
             map((report: Report) => report),
             catchError(err => of({error: err.message}))
