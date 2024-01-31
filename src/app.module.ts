@@ -8,24 +8,26 @@ import { UserEntity } from './user/models/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { ReportModule } from './report/report.module';
 import { ReportEntity } from './report/models/report.entity';
+import { MailerModule } from './mailer/mailer.module';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
       //url: process.env.DATABASE_URL,
-      host: 'wayne.cs.uwec.edu',
+      host: 'localhost',
       port: 3306,
-      username: 'KELLERKT5229',
-      password: '7OIXBVME',
-      database: 'cs485group6',
+      username: 'kkeller',
+      password: 'Wigglytoes12981481920676$',
+      database: 'roadreportlocal',
       entities: [UserEntity, ReportEntity],
       synchronize: true,
   }),
     ConfigModule.forRoot({isGlobal: true}),
     UserModule,
     AuthModule,
-    ReportModule
+    ReportModule,
+    MailerModule
   ],
   controllers: [AppController],
   providers: [AppService],
