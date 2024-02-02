@@ -7,7 +7,7 @@ import Mail, { Address } from 'nodemailer/lib/mailer';
 @Injectable()
 export class MailerService {
 
-    constructor(private configService: ConfigService) {
+    constructor(private readonly configService: ConfigService) {
 
     }
 
