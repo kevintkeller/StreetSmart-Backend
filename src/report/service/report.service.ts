@@ -1,7 +1,7 @@
 import { Injectable, Post } from '@nestjs/common';
 import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
 import { ReportEntity } from '../models/report.entity';
-import { Repository } from 'typeorm';
+import { Double, Repository } from 'typeorm';
 import { Report } from '../models/report.interface';
 import { Observable, map, switchMap, catchError, throwError, from, EMPTY } from 'rxjs';
 
@@ -20,8 +20,8 @@ export class ReportService {
         const newReport = new ReportEntity();
         newReport.title = report.title;
         newReport.content = report.content;
-        newReport.latitude = Number(report.latitude);
-        newReport.longitude = Number(report.longitude);
+        newReport.latitude = new Double(report.latitude);
+        newReport.longitude = new Double(report.longitude);
         newReport.userId = report.userId;
         newReport.reportStatus = 0;
         newReport.imageData = report.imageData;
