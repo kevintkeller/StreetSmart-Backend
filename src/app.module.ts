@@ -2,32 +2,41 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { UserEntity } from './user/models/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { ReportModule } from './report/report.module';
 import { ReportEntity } from './report/models/report.entity';
+import { MailerModule } from './mailer/mailer.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      //url: process.env.DATABASE_URL,
-      host: 'wayne.cs.uwec.edu',
-      port: 3306,
-      username: 'KELLERKT5229',
-      password: '7OIXBVME',
-      database: 'cs485group6',
-      entities: [UserEntity, ReportEntity],
-      synchronize: true,
-  }),
     ConfigModule.forRoot({isGlobal: true}),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+
+        type: 'mysql',
+        //url: process.env.DATABASE_URL,
+        host: configService.get('DB_HOST'),
+        port: +configService.get('DB_PORT'),
+        username: configService.get('DB_USER'),
+        password: configService.get('DB_PASSWORD'),
+        database: configService.get('DB_NAME'),
+        autoLoadEntities: true,
+        synchronize: true,
+      }),
+    }),
     UserModule,
     AuthModule,
-    ReportModule
+    ReportModule,
+    MailerModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ConfigService],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(private readonly configService: ConfigService) {}
+}
