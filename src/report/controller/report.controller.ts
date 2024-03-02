@@ -3,6 +3,7 @@ import { ReportService } from '../service/report.service';
 import { Report } from '../models/report.interface';
 import { Observable, catchError, map, of } from 'rxjs';
 import { ReportEntity } from '../models/report.entity';
+import { Public } from 'src/common/decorator/public.decorator';
 
 @Controller('report')
 export class ReportController {
@@ -23,6 +24,7 @@ export class ReportController {
         return this.reportService.findOneBy(params.reportId);
     }
 
+    @Public()
     @Get()
     findAll(): Observable<ReportEntity[]> {
         return this.reportService.findAll();

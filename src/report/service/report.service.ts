@@ -13,7 +13,7 @@ export class ReportService {
         @InjectRepository(ReportEntity) private readonly reportRepository: Repository<ReportEntity>
     ){}
 
-    create(report: Report): Observable<void | Report> {
+    public create(report: Report): Observable<void | Report> {
 
         console.log("service hit");
 
@@ -39,16 +39,18 @@ export class ReportService {
         )
     }
 
-    findOneBy(reportId: number): any {
+    public createVerified
+
+    public findOneBy(reportId: number): any {
         return this.reportRepository.query("SELECT userId FROM report_entity WHERE reportId = " + reportId);
     }
 
     // this one is done
-    deleteOne(reportId: number): Observable<any> {
+    public deleteOne(reportId: number): Observable<any> {
         return from(this.reportRepository.delete(reportId));
     }
 
-    findAll(): Observable<ReportEntity[]> {
+    public  findAll(): Observable<ReportEntity[]> {
         return from(this.reportRepository.find()).pipe(
             map((reports) => {
                 return reports;
@@ -56,7 +58,7 @@ export class ReportService {
         );
     }
 
-    updateOne(id: number, reportStatus: number): any {
+    public updateOne(id: number, reportStatus: number): any {
         this.reportRepository.query("UPDATE report_entity SET reportStatus = " + reportStatus + " WHERE reportId = " + id);
     }
 

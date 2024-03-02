@@ -4,11 +4,11 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './user/user.module';
-import { UserEntity } from './user/models/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { ReportModule } from './report/report.module';
-import { ReportEntity } from './report/models/report.entity';
 import { MailerModule } from './mailer/mailer.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { TypedEventEmitter } from './event-emitter/typed-event-emitter.class';
 
 @Module({
   imports: [
@@ -29,13 +29,14 @@ import { MailerModule } from './mailer/mailer.module';
         synchronize: true,
       }),
     }),
+    EventEmitterModule.forRoot(),
     UserModule,
     AuthModule,
     ReportModule,
     MailerModule
   ],
   controllers: [AppController],
-  providers: [AppService, ConfigService],
+  providers: [AppService, ConfigService, TypedEventEmitter],
 })
 export class AppModule {
   constructor(private readonly configService: ConfigService) {}

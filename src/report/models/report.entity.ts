@@ -1,5 +1,4 @@
-import { UserEntity } from "src/user/models/user.entity";
-import { Column, Double, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn} from "typeorm";
+import { Column, Double, Entity, PrimaryGeneratedColumn} from "typeorm";
 
 
 @Entity()
@@ -27,7 +26,6 @@ export class ReportEntity {
 
     @Column({
         type: "longblob",
-
     })
     imageData: string;
 }
