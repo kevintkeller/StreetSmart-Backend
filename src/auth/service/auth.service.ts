@@ -1,3 +1,4 @@
+import { UserVerified } from './../../user/models/user-verified.interface';
 import { ForgotPassword } from './../models/forgot-password.interface';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -9,7 +10,6 @@ import { Repository } from 'typeorm';
 import { EmailVerification } from '../models/email-verification.interface';
 import { TypedEventEmitter } from '../../event-emitter/typed-event-emitter.class';
 import { UserEntity } from 'src/user/models/user.entity';
-import { UserVerified } from 'src/user/models/user-verified.interface';
 import { UserVerifiedEntity } from 'src/user/models/user-verified.entity';
 import { ForgotPasswordEntity } from '../models/forgot-password.entity';
 const bcrypt = require('bcrypt');
@@ -58,7 +58,6 @@ export class AuthService {
         if (emailVerification && ((new Date().getTime() - emailVerification[0]?.timestamp.getTime()) / 60000 < .5)) {
             throw new HttpException('LOGIN.EMAIL_SENT_RECENTLY', HttpStatus.INTERNAL_SERVER_ERROR);
         } else {
-            let sql = 'REPLACE INTO email_verification_entity(email, emailToken, timeStamp) VALUES(\"' + email + '\"' + ', \"' + (Math.floor(Math.random() * (9000000)) + 1000000).toString() + '\", ' + new Date().toLocaleString().replace(',', '') + ')';
             await this.emailVerificationRepository.query('REPLACE INTO email_verification_entity(email, emailToken, timeStamp) VALUES(\"' + email + '\"' + ', \"' + (Math.floor(Math.random() * (9000000)) + 1000000).toString() + '\", NOW());');
             return true;
         }
@@ -71,7 +70,7 @@ export class AuthService {
                 name: "New User",
                 email: entity[0].email,
                 otp: entity[0].emailToken
-            })
+            });
             return true;
         } else {
             throw new HttpException('REGISTER.USER_NOT_REGISTERED', HttpStatus.FORBIDDEN);
@@ -138,9 +137,18 @@ export class AuthService {
         const entity = await this.userVerifiedRepository.query('SELECT * FROM user_verified_entity WHERE email=\"' + email + '\"')
         if (!entity) return false;
         const tokenModel = await this.createForgottenPasswordToken(email);
+        console.log(tokenModel.forgotPasswordToken);
+        console.log(tokenModel[0].forgotPasswordToken);
         
-        if (tokenModel && tokenModel.forgotPasswordToken) {
-            
+        if (tokenModel && tokenModel[0].forgotPasswordToken) {
+            this.eventEmitter.emit('user.forgot-password', {
+                name: "New User",
+                email: entity[0].email,
+                otp: tokenModel[0].forgotPasswordToken,
+            });
+            return true;
+        } else {
+            throw new HttpException('REGISTER.USER_NOT_REGISTERED', HttpStatus.FORBIDDEN);
         }
     }
 
@@ -149,9 +157,24 @@ export class AuthService {
         if (forgottenPassword && ((new Date().getTime() - forgottenPassword[0]?.timestamp.getTime()) / 60000 < .5)) {
             throw new HttpException('LOGIN.EMAIL_SENT_RECENTLY', HttpStatus.INTERNAL_SERVER_ERROR);
         } else {
-            const sql = 'REPLACE INTO forgot_password_entity(email, forgotPasswordToken, timeStamp) VALUES(\"' + email + '\"' + ', \"' + (Math.floor(Math.random() * (9000000)) + 1000000).toString() + '\", ' + new Date().toLocaleString().replace(',', '') + ')';
-            const forgotPasswordModel = await this.forgotPasswordRepository.query('REPLACE INTO forgot_password_entity(email, emailToken, timeStamp) VALUES(\"' + email + '\"' + ', \"' + (Math.floor(Math.random() * (9000000)) + 1000000).toString() + '\", NOW());');
-            return forgotPasswordModel;
+            const forgotPasswordModel = await this.forgotPasswordRepository.query('REPLACE INTO forgot_password_entity(email, forgotPasswordToken, timeStamp) VALUES(\"' + email + '\"' + ', \"' + (Math.floor(Math.random() * (9000000)) + 1000000).toString() + '\", NOW());');
+            return this.forgotPasswordRepository.query('SELECT * FROM forgot_password_entity WHERE email=\"' + email + '\" ORDER BY timeStamp DESC');
         }
+    }
+
+    async checkPassword(email: string, password: string) {
+        let existingUser = await this.userVerifiedRepository.query("SELECT * FROM user_verified_entity WHERE email = \'" + email + "\'");
+        if (!existingUser) {
+            throw new HttpException('LOGIN.USER_NOT_FOUND', HttpStatus.NOT_FOUND);
+        }
+        return await bcrypt.compare(password, existingUser[0].password);
+    }
+
+    async getForgottenPasswordModel(newPasswordToken: string): Promise<ForgotPassword> {
+        return await this.forgotPasswordRepository.query("SELECT * FROM forgot_password_entity WHERE forgotPasswordToken = \'" + newPasswordToken + "\'");
+    }
+
+    async removeForgottenPasswordModel(forgotPassword: ForgotPassword): Promise<ForgotPassword> {
+        return await this.forgotPasswordRepository.remove(forgotPassword);
     }
 }

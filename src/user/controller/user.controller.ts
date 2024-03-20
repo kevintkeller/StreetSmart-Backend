@@ -1,11 +1,11 @@
-import { Observable, catchError, map, of, tap } from 'rxjs';
-import { Controller, Post, Body, Get, Param, Delete, Put, Query, UseGuards, Req } from '@nestjs/common';
-import { UserService } from '../service/user.service';
-import { User } from '../models/user.interface';
-import { TypedEventEmitter } from '../../event-emitter/typed-event-emitter.class';
-import { AuthGuard } from '../../common/guard/auth.guard';
-import { Public } from 'src/common/decorator/public.decorator';
+import { Body, Controller, Delete, Get, Param, Post, Put, Req } from '@nestjs/common';
+import { Observable, catchError, map, of } from 'rxjs';
+import { ResetPasswordDto } from 'src/auth/dto/reset-password.dto';
 import { AuthService } from 'src/auth/service/auth.service';
+import { Public } from 'src/common/decorator/public.decorator';
+import { TypedEventEmitter } from '../../event-emitter/typed-event-emitter.class';
+import { User } from '../models/user.interface';
+import { UserService } from '../service/user.service';
 
 @Controller('users')
 export class UserController {
@@ -44,13 +44,14 @@ export class UserController {
         }
     }
 
+    @Public()
     @Get('email/resend-verification/:email')
     public async resendEmailVerification(@Param() params) {
         try {
             await this.authService.createEmailToken(params.email);
             let isEmailSent = await this.authService.sendEmailVerification(params.email);
             if (isEmailSent) {
-                return 'Great success!'
+                return 'Email successfully sent'
             } else {
                 return 'An error occurred while resending the verification email';
             }
@@ -59,12 +60,14 @@ export class UserController {
         }
     }
 
+    @Public()
     @Get('email/forgot-password/:email')
     public async sendEmailForgotPassword(@Param() params) {
         try {
-            const isEmailSend = await this.authService.sendEmailForgotPassword(params.email);
+            const isEmailSent = await this.authService.sendEmailForgotPassword(params.email);
+            console.log(isEmailSent);
         } catch (error) {
-            return 'An error occurred while sending the forgot password email';
+            return error;
         }
     }
 
@@ -78,11 +81,13 @@ export class UserController {
         )
     }
 
+    @Public()
     @Get(':id')
     findOneBy(@Param() params: any): Observable<User> {
         return this.userService.findOneBy(params.id);
     }
 
+    @Public()
     @Post('getUserByEmail')
     findOneByUsername(@Body() user: any): Observable<Object[]> {
         return this.userService.findOneByUsername(user.email);
@@ -106,5 +111,34 @@ export class UserController {
     @Post('profile/retrieve')
     getProfile(@Req() req) {
       return req.user;
+    }
+
+    @Public()
+    @Post('email/reset-password')
+    public async setNewPassword(@Body() resetPassword: ResetPasswordDto) {
+        try {
+            if (resetPassword.email && resetPassword.currentPassword) {
+                let isNewPasswordChanged: boolean = false;
+                if (resetPassword && resetPassword.currentPassword) {
+                    isNewPasswordChanged = await this.authService.checkPassword(resetPassword.email, resetPassword.currentPassword);
+                } else {
+                    return 'wrong current password';
+                }
+            }
+            if (resetPassword.newPasswordToken) {
+                let forgottenPassword = await this.authService.getForgottenPasswordModel(resetPassword.newPasswordToken);
+                const isNewPasswordChanged = await this.userService.updateVerifiedUser(resetPassword.email, resetPassword.newPassword);
+                if (isNewPasswordChanged) {
+                    // TODO: remove from forgotten password entity
+                    return this.authService.removeForgottenPasswordModel(forgottenPassword);
+                } else {
+                    return 'fail';
+                }
+            } else {
+                return 'Failure with token provided';
+            }
+        } catch (error) {
+            return error;
+        }
     }
 }

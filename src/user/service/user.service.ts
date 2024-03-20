@@ -7,12 +7,14 @@ import { Repository } from 'typeorm';
 import { User } from '../models/user.interface';
 import { switchMap, map, catchError, tap } from 'rxjs/operators';
 import { EMPTY } from 'rxjs';
+import { UserVerifiedEntity } from '../models/user-verified.entity';
 
 @Injectable()
 export class UserService {
 
     constructor(@InjectRepository(UserEntity) private readonly userRepository: Repository<UserEntity>,
-        private authService: AuthService) {}
+                    @InjectRepository(UserVerifiedEntity) private readonly userVerifiedRepository: Repository<UserVerifiedEntity>,
+                    private authService: AuthService) {}
 
     public create(user: User): Observable<User> {
         const hashed = this.authService.hashPassword(user.password).pipe(
@@ -39,9 +41,8 @@ export class UserService {
     }
 
 
-
     public findOneBy(id: number): Observable<User> {
-        return from(this.userRepository.findOneBy({id})).pipe(
+        return from(this.userVerifiedRepository.findOneBy({id})).pipe(
             map((user: User) => {
                 const {password, ...result} = user;
                 return result;
@@ -50,11 +51,12 @@ export class UserService {
     }
 
     public findOneByUsername(user: any): any {
-        return this.userRepository.query("SELECT id FROM user_entity WHERE email = \"" + user + "\"");
+        console.log(user);
+        return this.userVerifiedRepository.query('SELECT verifiedId FROM user_verified_entity WHERE email = \"' + user + '\"');
     }
 
     public findAll(): Observable<User[]> {
-        return from(this.userRepository.find()).pipe(
+        return from(this.userVerifiedRepository.find()).pipe(
             map((users) => {
                 users.forEach(function (v) {delete v.password});
                 return users;
@@ -103,10 +105,20 @@ export class UserService {
     }
 
     public findByMail(email: string): Observable<User> {
-        return from(this.userRepository.findOneBy({email}));
+        return from(this.userVerifiedRepository.findOneBy({email}));
     }
 
     public getAdminFlg(id: number): any {
-        return this.userRepository.query("SELECT adminFlg FROM user_entity WHERE id = " + id);
+        console.log(id);
+        return this.userVerifiedRepository.query("SELECT adminFlg FROM user_verified_entity WHERE verifiedId = " + id);
+    }
+
+    public updateVerifiedUser(email: string, password: string) {
+        console.log(password);
+        return this.authService.hashPassword(password).subscribe((result) => {
+            password = result;
+            console.log('UPDATE user_verified_entity SET email = \"' + email + '\", ' + 'password = \"' + password + '\" WHERE email = \"' + email + '\"');
+            return this.userVerifiedRepository.query('UPDATE user_verified_entity SET email = \"' + email + '\", ' + 'password = \"' + password + '\" WHERE email = \"' + email + '\"');
+        });
     }
 }

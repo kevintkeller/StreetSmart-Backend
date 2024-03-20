@@ -10,6 +10,7 @@ import { EmailVerificationEntity } from './models/email-verification.entity';
 import { TypedEventEmitter } from '../event-emitter/typed-event-emitter.class';
 import { UserEntity } from 'src/user/models/user.entity';
 import { UserVerifiedEntity } from 'src/user/models/user-verified.entity';
+import { ForgotPasswordEntity } from './models/forgot-password.entity';
 
 @Module({
     imports: [
@@ -26,7 +27,8 @@ import { UserVerifiedEntity } from 'src/user/models/user-verified.entity';
         }),
         TypeOrmModule.forFeature([EmailVerificationEntity]),
         TypeOrmModule.forFeature([UserEntity]),
-        TypeOrmModule.forFeature([UserVerifiedEntity])
+        TypeOrmModule.forFeature([UserVerifiedEntity]),
+        TypeOrmModule.forFeature([ForgotPasswordEntity]),
     ],
     providers: [
         AuthService,

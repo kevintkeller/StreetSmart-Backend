@@ -15,8 +15,6 @@ export class ReportService {
 
     public create(report: Report): Observable<void | Report> {
 
-        console.log("service hit");
-
         const newReport = new ReportEntity();
         newReport.title = report.title;
         newReport.content = report.content;
@@ -38,8 +36,6 @@ export class ReportService {
             })
         )
     }
-
-    public createVerified
 
     public findOneBy(reportId: number): any {
         return this.reportRepository.query("SELECT userId FROM report_entity WHERE reportId = " + reportId);

@@ -17,9 +17,8 @@ export class MailerService {
     }
 
     @OnEvent('user.welcome')
-    async welcomeEmail(data: EventPayloads['user.welcome']): Promise<void> {
+    public async welcomeEmail(data: EventPayloads['user.welcome']): Promise<void> {
         const { email, name } = data;
-        console.log('that\'s whats up');
         const subject = 'Welcome to Road Report';
 
         const replacements = {
@@ -30,7 +29,7 @@ export class MailerService {
             from: {name: this.configService.get<string>('APP_NAME'), address: this.configService.get<string>('DEFAULT_MAIL_FROM') },
             recipients: [{ name: name, address: email }],
             subject: subject,
-            html: 'yo',
+            html: welcomeEmail,
             placeholderReplacements: replacements,
         };
 
@@ -38,28 +37,43 @@ export class MailerService {
     }
 
     @OnEvent('user.verify-email')
-    async verifyEmail(data: EventPayloads['user.verify-email']): Promise<void> {
+    public async verifyEmail(data: EventPayloads['user.verify-email']): Promise<void> {
         const { name, email, otp } = data;
         const subject = `Road Report: One Time Passcode`;
         const replacements = {
             replaceName: name,
             passcode: otp
-        }
-
+        };
         const dto: SendEmailDto = {
             from: {name: this.configService.get<string>('APP_NAME'), address: this.configService.get<string>('DEFAULT_MAIL_FROM') },
             recipients: [{ name: name, address: email }],
             subject: subject,
-            html: '<p>Hello, ' + name +' Here is your one time passcode: ' + otp +'</p>',
+            html: '<p>Hello, ' + name + ' Here is your one time passcode: ' + otp + '</p>',
             placeholderReplacements: replacements,
         };
-
         await this.sendEmail(dto);
     }
 
-    mailTransport() {
-        const nodemailer = require("nodemailer");
+    @OnEvent('user.forgot-password')
+    public async forgotPasswordEmail(data: EventPayloads['user.forgot-password']): Promise<void> {
+        const { name, email, otp } = data;
+        const subject = 'Road Report: Reset Password';
+        const replacements = {
+            replaceName: name,
+            passcode: otp.forgotPasswordToken
+        };
+        const dto: SendEmailDto = {
+            from: {name: this.configService.get<string>('APP_NAME'), address: this.configService.get<string>('DEFAULT_MAIL_FROM') },
+            recipients: [{ name: name, address: email }],
+            subject: subject,
+            html: '<p>Hello, ' + name + 'Here is your one time passcode: ' + otp + '</p>',
+            placeholderReplacements: replacements,
+        };
+        await this.sendEmail(dto);
+    }
 
+    public mailTransport(): any {
+        const nodemailer = require("nodemailer");
         const transporter = nodemailer.createTransport({
             host: this.configService.get<string>('MAIL_HOST'),
             port: this.configService.get<string>('MAIL_PORT'),
@@ -70,7 +84,6 @@ export class MailerService {
                 pass: this.configService.get<string>('MAIL_PASSWORD'),
             },
         });
-
         return transporter;
     }
 
@@ -91,10 +104,10 @@ export class MailerService {
 
         try {
             const result = await transport.sendMail(options);
-
             return result;
         } catch (error) {
             console.log(error);
+            return error;
         }
     }
 
