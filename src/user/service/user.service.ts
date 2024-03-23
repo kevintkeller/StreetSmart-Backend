@@ -97,6 +97,7 @@ export class UserService {
                         const {password, ...result} = user;
                         return result;
                     } else {
+                        console.log('hit4');
                         throw Error;
                     }
                 })

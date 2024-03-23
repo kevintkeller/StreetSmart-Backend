@@ -46,7 +46,7 @@ export class ReportService {
         return from(this.reportRepository.delete(reportId));
     }
 
-    public  findAll(): Observable<ReportEntity[]> {
+    public findAll(): Observable<ReportEntity[]> {
         return from(this.reportRepository.find()).pipe(
             map((reports) => {
                 return reports;

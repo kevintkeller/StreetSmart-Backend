@@ -74,6 +74,7 @@ export class UserController {
     @Public()
     @Post('login')
     login(@Body() user: User): Observable<Object> {
+        console.log('hit');
         return this.userService.login(user).pipe(
             map((jwt: string) => {
                 return {access_token: jwt};
