@@ -8,12 +8,16 @@ import { User } from '../models/user.interface';
 import { switchMap, map, catchError, tap } from 'rxjs/operators';
 import { EMPTY } from 'rxjs';
 import { UserVerifiedEntity } from '../models/user-verified.entity';
+import { ReportContactEntity } from '../models/report-contact.entity';
+import { ReportContact } from '../models/report-contact.interface';
+import { report } from 'process';
 
 @Injectable()
 export class UserService {
 
     constructor(@InjectRepository(UserEntity) private readonly userRepository: Repository<UserEntity>,
                     @InjectRepository(UserVerifiedEntity) private readonly userVerifiedRepository: Repository<UserVerifiedEntity>,
+                    @InjectRepository(ReportContactEntity) private readonly reportContactRepository: Repository<ReportContact>,
                     private authService: AuthService) {}
 
     public create(user: User): Observable<User> {
@@ -35,11 +39,17 @@ export class UserService {
                 )
             })
         );
-        
         hashed.subscribe(x=>console.log(x));
         return hashed;
     }
 
+    public addReportContact(reportContact: ReportContact) {
+        return from(this.reportContactRepository.save(reportContact)).pipe(
+            map((contact: ReportContact) => {
+                return contact;
+            })
+        )
+    }
 
     public findOneBy(id: number): Observable<User> {
         return from(this.userVerifiedRepository.findOneBy({id})).pipe(
@@ -51,7 +61,6 @@ export class UserService {
     }
 
     public findOneByUsername(user: any): any {
-        console.log(user);
         return this.userVerifiedRepository.query('SELECT verifiedId FROM user_verified_entity WHERE email = \"' + user + '\"');
     }
 
@@ -62,6 +71,22 @@ export class UserService {
                 return users;
             })
         );
+    }
+
+    public getAllAdmins(): Observable<UserVerifiedEntity[]> {
+        return from(this.userVerifiedRepository.find()).pipe(
+            map((users) => {
+                return users.filter(this.filterAdmin);
+            })
+        );
+    }
+
+    public filterAdmin(user: UserVerifiedEntity): boolean {
+        if (user.adminFlg == 1) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public deleteOne(id: number): Observable<any> {
@@ -110,16 +135,31 @@ export class UserService {
     }
 
     public getAdminFlg(id: number): any {
-        console.log(id);
-        return this.userVerifiedRepository.query("SELECT adminFlg FROM user_verified_entity WHERE verifiedId = " + id);
+        return this.userVerifiedRepository.query('SELECT adminFlg FROM user_verified_entity WHERE verifiedId = ' + id);
     }
 
     public updateVerifiedUser(email: string, password: string) {
-        console.log(password);
         return this.authService.hashPassword(password).subscribe((result) => {
             password = result;
-            console.log('UPDATE user_verified_entity SET email = \"' + email + '\", ' + 'password = \"' + password + '\" WHERE email = \"' + email + '\"');
             return this.userVerifiedRepository.query('UPDATE user_verified_entity SET email = \"' + email + '\", ' + 'password = \"' + password + '\" WHERE email = \"' + email + '\"');
         });
     }
+    
+    public updateAdmin(email: string) {
+        return this.userVerifiedRepository.query('UPDATE user_verified_entity SET adminFlg = 1 ' + ' WHERE email = \"' + email + '\"');
+    }
+
+    public updateReportContact(contactId: number, email: string, reportType: string) {
+        return this.reportContactRepository.query('UPDATE report_contact_entity SET email = \"' + email + '\", ' + 'reportType = \"' + reportType + '\" WHERE contactId = ' + contactId);
+    }
+
+    public getAllReportContacts(): Observable<ReportContact[]> {
+        return from(this.reportContactRepository.find()).pipe(
+            map((reportContacts) => {
+                return reportContacts;
+            })
+        );
+    }
+
+
 }

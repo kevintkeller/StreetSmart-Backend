@@ -9,10 +9,11 @@ import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthGuard } from 'src/common/guard/auth.guard';
 import { UserVerifiedEntity } from './models/user-verified.entity';
+import { ReportContactEntity } from './models/report-contact.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity, UserVerifiedEntity]),
+    TypeOrmModule.forFeature([UserEntity, UserVerifiedEntity, ReportContactEntity]),
     AuthModule,
     JwtModule
   ],

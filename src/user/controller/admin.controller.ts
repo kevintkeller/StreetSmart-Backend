@@ -3,6 +3,9 @@ import { Controller, Post, Body, Get, Param, Delete, Put, Query } from '@nestjs/
 import { UserService } from '../service/user.service';
 import { User } from '../models/user.interface';
 import { Public } from 'src/common/decorator/public.decorator';
+import { UserEntity } from '../models/user.entity';
+import { UserVerifiedEntity } from '../models/user-verified.entity';
+import { ReportContact } from '../models/report-contact.interface';
 
 @Controller('admin')
 export class AdminController {
@@ -12,8 +15,33 @@ export class AdminController {
     @Public()
     @Post('adminFlg')
     findOneBy(@Body() params: any): Observable<Object[]> {
-        console.log(JSON.stringify(params));
         return this.userService.getAdminFlg(params.id);
     }
+
+    @Get('getAllAdmins')
+    getAllAdmins(): Observable<UserVerifiedEntity[]> {
+        return this.userService.getAllAdmins();
+    }
+
+    @Post('updateAdmin')
+    updateAdmin(@Body()body: any) {
+        return this.userService.updateAdmin(body.email);
+    }
+
+    @Get('getAllReportContacts')
+    getAllReportContacts(): Observable<ReportContact[]> {
+        return this.userService.getAllReportContacts();
+    }
+
+    @Post('addNewReportContact')
+    addNewReportContact(@Body() body: ReportContact) {
+        return this.userService.addReportContact(body);
+    }
+
+    @Post('updateReportContact')
+    updateReportContact(@Body()body: any) {
+        return this.userService.updateReportContact(body.contactId, body.email, body.reportType);
+    }
+
 
 }
