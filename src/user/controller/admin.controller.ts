@@ -18,26 +18,31 @@ export class AdminController {
         return this.userService.getAdminFlg(params.id);
     }
 
+    @Public()
     @Get('getAllAdmins')
     getAllAdmins(): Observable<UserVerifiedEntity[]> {
         return this.userService.getAllAdmins();
     }
 
+    @Public()
     @Post('updateAdmin')
     updateAdmin(@Body()body: any) {
         return this.userService.updateAdmin(body.email);
     }
 
+    @Public()
     @Get('getAllReportContacts')
     getAllReportContacts(): Observable<ReportContact[]> {
         return this.userService.getAllReportContacts();
     }
 
+    @Public()
     @Post('addNewReportContact')
     addNewReportContact(@Body() body: ReportContact) {
         return this.userService.addReportContact(body);
     }
 
+    @Public()
     @Post('updateReportContact')
     updateReportContact(@Body()body: any) {
         return this.userService.updateReportContact(body.contactId, body.email, body.reportType);
