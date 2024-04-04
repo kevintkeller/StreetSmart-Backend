@@ -12,13 +12,13 @@ export class ReportController {
 
     @Post()
     create(@Body()report: Report): Observable<Report | Object> {
-        //console.log("hit" + report.imageData);
         return this.reportService.create(report).pipe(
             map((report: Report) => report),
             catchError(err => of({error: err.message}))
         );
     }
 
+    @Public()
     @Get(':reportId')
     findOneBy(@Param()params: any) {
         return this.reportService.findOneBy(params.reportId);
@@ -30,14 +30,16 @@ export class ReportController {
         return this.reportService.findAll();
     }
 
+    @Public()
     @Delete(':reportId')
     deleteOne(@Param('reportId')reportId: string): Observable<Report> {
         return this.reportService.deleteOne(Number(reportId));
     }
 
+    @Public()
     @Post('updateReportStatus')
     updateOne(@Body() report: any) {
         this.reportService.updateOne(report.id, report.reportStatus);
     }
-    
+
 }

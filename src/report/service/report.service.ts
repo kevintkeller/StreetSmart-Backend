@@ -14,19 +14,18 @@ export class ReportService {
     ){}
 
     public create(report: Report): Observable<void | Report> {
-
         const newReport = new ReportEntity();
         newReport.title = report.title;
         newReport.content = report.content;
-        newReport.latitude = new Double(report.latitude);
-        newReport.longitude = new Double(report.longitude);
+        newReport.latitude = report.latitude;
+        newReport.longitude = report.longitude;
         newReport.userId = report.userId;
         newReport.reportStatus = 0;
         newReport.imageData = report.imageData;
-        console.log(newReport);
         
         return from(this.reportRepository.save(newReport)).pipe(
             map((report: ReportEntity) => {
+                console.log(report.content);
                 const {...result} = report;
                 return;
             }),
