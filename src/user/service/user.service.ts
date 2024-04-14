@@ -1,6 +1,6 @@
 import { AuthService } from '../../auth/service/auth.service';
 import { Observable, from } from 'rxjs';
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../models/user.entity';
 import { Repository } from 'typeorm';
@@ -101,14 +101,14 @@ export class UserService {
             switchMap(()=>this.findOneBy(id))
         );
     }
-
+    
     public login(user: User): Observable<string> {
         return this.validateUser(user.email, user.password).pipe(
             switchMap((user: User) => {
                 if(user) {
                     return this.authService.generateJWT(user).pipe(map((jwt: string) => jwt));
                 } else {
-                    return 'Incorrect username or password.';
+                    throw new HttpException('Incorrect Username or Password', 401);
                 }
             })
         )

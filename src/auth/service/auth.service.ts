@@ -12,6 +12,7 @@ import { TypedEventEmitter } from '../../event-emitter/typed-event-emitter.class
 import { UserEntity } from 'src/user/models/user.entity';
 import { UserVerifiedEntity } from 'src/user/models/user-verified.entity';
 import { ForgotPasswordEntity } from '../models/forgot-password.entity';
+import { Request } from 'express';
 const bcrypt = require('bcrypt');
 
 
@@ -41,20 +42,19 @@ export class AuthService {
 
     }
 
-    generateJWT(user: User): Observable<string> {
+    public generateJWT(user: User): Observable<string> {
         return from(this.jwtService.signAsync(user));
     }
 
-    hashPassword(password: string): Observable<string> {
+    public hashPassword(password: string): Observable<string> {
         return from<string>(bcrypt.hash(password, 12));
     }
 
-    comparePasswords(newPassword: string, passwordHash: string): Observable<any | boolean> {
-        console.log(bcrypt.compare(newPassword, passwordHash));
+    public comparePasswords(newPassword: string, passwordHash: string): Observable<any | boolean> {
         return from<any | boolean>(bcrypt.compare(newPassword, passwordHash));
     }
 
-    async createEmailToken(email: string): Promise<boolean> {
+    public async createEmailToken(email: string): Promise<boolean> {
         let emailVerification: EmailVerification = await this.emailVerificationRepository.query('SELECT * FROM email_verification_entity WHERE email=\"' + email + '\" ORDER BY timeStamp DESC');
         if (emailVerification && ((new Date().getTime() - emailVerification[0]?.timestamp.getTime()) / 60000 < .5)) {
             throw new HttpException('LOGIN.EMAIL_SENT_RECENTLY', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -64,7 +64,7 @@ export class AuthService {
         }
     }
 
-    async sendEmailVerification(email: string): Promise<boolean> {
+    public async sendEmailVerification(email: string): Promise<boolean> {
         let entity = await this.emailVerificationRepository.query('SELECT * FROM email_verification_entity WHERE email=\"' + email + '\"')
         if (entity && entity[0].emailToken) {
             this.eventEmitter.emit('user.verify-email', {
@@ -78,7 +78,7 @@ export class AuthService {
         }
     }
 
-    async verifyEmail(token: string): Promise<boolean> {
+    public async verifyEmail(token: string): Promise<boolean> {
         let emailVerif = await this.emailVerificationRepository.query('SELECT * FROM email_verification_entity WHERE emailToken = ' + token);
         if (emailVerif && emailVerif[0]?.email) {
             let user = await this.userRepository.query('SELECT * FROM user_entity WHERE email = \"' + emailVerif[0]?.email + "\"");
@@ -121,7 +121,6 @@ export class AuthService {
         newUserVerified.profilePictureData = '';
         newUserVerified.adminFlg = 0;
 
-        console.log(newUserVerified);
         return from(this.userVerifiedRepository.save(newUserVerified)).pipe(
             map((userVerified: UserVerified) => {
                 const {password, ...result} = userVerified;
@@ -134,12 +133,10 @@ export class AuthService {
         )
     }
 
-    async sendEmailForgotPassword(email: string): Promise<boolean> {
+    public async sendEmailForgotPassword(email: string): Promise<boolean> {
         const entity = await this.userVerifiedRepository.query('SELECT * FROM user_verified_entity WHERE email=\"' + email + '\"')
         if (!entity) return false;
         const tokenModel = await this.createForgottenPasswordToken(email);
-        console.log(tokenModel.forgotPasswordToken);
-        console.log(tokenModel[0].forgotPasswordToken);
         
         if (tokenModel && tokenModel[0].forgotPasswordToken) {
             this.eventEmitter.emit('user.forgot-password', {
@@ -153,7 +150,7 @@ export class AuthService {
         }
     }
 
-    async createForgottenPasswordToken(email: string): Promise<ForgotPassword> {
+    public async createForgottenPasswordToken(email: string): Promise<ForgotPassword> {
         let forgottenPassword =  await this.forgotPasswordRepository.query('SELECT * FROM forgot_password_entity WHERE email=\"' + email + '\" ORDER BY timeStamp DESC');
         if (forgottenPassword && ((new Date().getTime() - forgottenPassword[0]?.timestamp.getTime()) / 60000 < .5)) {
             throw new HttpException('LOGIN.EMAIL_SENT_RECENTLY', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -163,7 +160,7 @@ export class AuthService {
         }
     }
 
-    async checkPassword(email: string, password: string) {
+    public async checkPassword(email: string, password: string) {
         let existingUser = await this.userVerifiedRepository.query("SELECT * FROM user_verified_entity WHERE email = \'" + email + "\'");
         if (!existingUser) {
             throw new HttpException('LOGIN.USER_NOT_FOUND', HttpStatus.NOT_FOUND);
@@ -171,11 +168,11 @@ export class AuthService {
         return await bcrypt.compare(password, existingUser[0].password);
     }
 
-    async getForgottenPasswordModel(newPasswordToken: string): Promise<ForgotPassword> {
+    public async getForgottenPasswordModel(newPasswordToken: string): Promise<ForgotPassword> {
         return await this.forgotPasswordRepository.query("SELECT * FROM forgot_password_entity WHERE forgotPasswordToken = \'" + newPasswordToken + "\'");
     }
 
-    async removeForgottenPasswordModel(forgotPassword: ForgotPassword): Promise<ForgotPassword> {
+    public async removeForgottenPasswordModel(forgotPassword: ForgotPassword): Promise<ForgotPassword> {
         return await this.forgotPasswordRepository.remove(forgotPassword);
     }
 }

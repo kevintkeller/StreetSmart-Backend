@@ -1,11 +1,14 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Req } from '@nestjs/common';
-import { Observable, catchError, map, of } from 'rxjs';
+import { Body, Controller, Delete, Get, HttpException, Param, Post, Put, Req, Res } from '@nestjs/common';
+import { Observable, catchError, map, of, lastValueFrom, switchMap } from 'rxjs';
 import { ResetPasswordDto } from 'src/auth/dto/reset-password.dto';
 import { AuthService } from 'src/auth/service/auth.service';
 import { Public } from 'src/common/decorator/public.decorator';
 import { TypedEventEmitter } from '../../event-emitter/typed-event-emitter.class';
 import { User } from '../models/user.interface';
 import { UserService } from '../service/user.service';
+import * as cookieParser from 'cookie-parser';
+import { Response } from 'express';
+
 
 @Controller('users')
 export class UserController {
@@ -65,7 +68,6 @@ export class UserController {
     public async sendEmailForgotPassword(@Param() params) {
         try {
             const isEmailSent = await this.authService.sendEmailForgotPassword(params.email);
-            console.log(isEmailSent);
         } catch (error) {
             return error;
         }
@@ -73,13 +75,17 @@ export class UserController {
 
     @Public()
     @Post('login')
-    login(@Body() user: User): Observable<Object> {
+    login(@Body() user: User, @Res({ passthrough: true }) response: Response): Observable<Object> {
         console.log('hit');
         return this.userService.login(user).pipe(
             map((jwt: string) => {
-                return {access_token: jwt};
+                response.cookie('jwt', jwt, { httpOnly: true })
+                return { result: 'Success' };
+            }),
+            catchError((error) => {
+                throw new HttpException('Incorrect Username or Password', 401);
             })
-        )
+        );
     }
 
     @Public()

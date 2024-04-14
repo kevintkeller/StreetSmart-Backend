@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Headers } from '@nestjs/common';
 import { ReportService } from '../service/report.service';
 import { Report } from '../models/report.interface';
 import { Observable, catchError, map, of } from 'rxjs';
 import { ReportEntity } from '../models/report.entity';
 import { Public } from 'src/common/decorator/public.decorator';
+import { Request } from 'express';
 
 @Controller('report')
 export class ReportController {
@@ -11,7 +12,8 @@ export class ReportController {
     constructor(private reportService: ReportService){}
 
     @Post()
-    create(@Body()report: Report): Observable<Report | Object> {
+    create(@Headers('withCredentials') withCredentials: string, @Body()report: Report): Observable<Report | Object> {
+        console.log(withCredentials);
         return this.reportService.create(report).pipe(
             map((report: Report) => report),
             catchError(err => of({error: err.message}))
