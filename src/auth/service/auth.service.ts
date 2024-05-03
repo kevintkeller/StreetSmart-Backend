@@ -134,31 +134,66 @@ export class AuthService {
     }
 
     public async sendEmailForgotPassword(email: string): Promise<boolean> {
-        const entity = await this.userVerifiedRepository.query('SELECT * FROM user_verified_entity WHERE email=\"' + email + '\"')
-        if (!entity) return false;
-        const tokenModel = await this.createForgottenPasswordToken(email);
-        
-        if (tokenModel && tokenModel[0].forgotPasswordToken) {
-            this.eventEmitter.emit('user.forgot-password', {
-                name: "New User",
-                email: entity[0].email,
-                otp: tokenModel[0].forgotPasswordToken,
-            });
-            return true;
-        } else {
-            throw new HttpException('REGISTER.USER_NOT_REGISTERED', HttpStatus.FORBIDDEN);
+        try {
+            // Use parameterized query to prevent SQL injection
+            const entity = await this.userVerifiedRepository
+                .createQueryBuilder('userVerifiedEntity')
+                .where('userVerifiedEntity.email = :email', { email })
+                .getOne();
+            
+            // Check if the entity array is not empty
+            if (!entity) {
+                throw new HttpException('REGISTER.USER_NOT_REGISTERED', HttpStatus.FORBIDDEN);
+            } else {
+                const tokenModel: ForgotPassword = await this.createForgottenPasswordToken(email);
+                if (tokenModel && tokenModel.forgotPasswordToken) {
+                    this.eventEmitter.emit('user.forgot-password', {
+                        name: "New User",
+                        email: tokenModel.email, // Assuming you want to use the first entity's email
+                        otp: tokenModel.forgotPasswordToken,
+                    });
+                    return true;
+                } else {
+                    throw new HttpException('REGISTER.USER_NOT_REGISTERED', HttpStatus.FORBIDDEN);
+                }
+            }
+        } catch (error) {
+            // Handle any errors that occur during the database operation
+            console.error('Error sending forgot password email:', error);
+            throw new HttpException('An error occurred while processing your request.', HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     public async createForgottenPasswordToken(email: string): Promise<ForgotPassword> {
-        let forgottenPassword =  await this.forgotPasswordRepository.query('SELECT * FROM forgot_password_entity WHERE email=\"' + email + '\" ORDER BY timeStamp DESC');
-        if (forgottenPassword && ((new Date().getTime() - forgottenPassword[0]?.timestamp.getTime()) / 60000 < .5)) {
-            throw new HttpException('LOGIN.EMAIL_SENT_RECENTLY', HttpStatus.INTERNAL_SERVER_ERROR);
+        // Use parameterized queries to prevent SQL injection
+        let forgottenPassword = await this.forgotPasswordRepository.find({
+          where: { email: email },
+          order: { timeStamp: 'DESC' },
+        });
+    
+        console.log(forgottenPassword);
+    
+        if (forgottenPassword.length > 0 && ((new Date().getTime() - forgottenPassword[0].timeStamp.getTime()) / 60000 < 0.5)) {
+          console.log('here we go dawg');
+          throw new HttpException('LOGIN.EMAIL_SENT_RECENTLY', HttpStatus.INTERNAL_SERVER_ERROR);
         } else {
-            const forgotPasswordModel = await this.forgotPasswordRepository.query('REPLACE INTO forgot_password_entity(email, forgotPasswordToken, timeStamp) VALUES(\"' + email + '\"' + ', \"' + (Math.floor(Math.random() * (9000000)) + 1000000).toString() + '\", NOW());');
-            return this.forgotPasswordRepository.query('SELECT * FROM forgot_password_entity WHERE email=\"' + email + '\" ORDER BY timeStamp DESC');
+          console.log('spaghetti');
+          const forgotPasswordToken = (Math.floor(Math.random() * (9000000)) + 1000000).toString();
+          const newForgotPassword = this.forgotPasswordRepository.create({
+            email: email,
+            forgotPasswordToken: forgotPasswordToken,
+            timeStamp: new Date(),
+          });
+    
+          await this.forgotPasswordRepository.save(newForgotPassword);
+    
+          // Retrieve the newly created or updated forgot password record
+          return this.forgotPasswordRepository.findOne({
+            where: { email: email },
+            order: { timeStamp: 'DESC' },
+          });
         }
-    }
+     }
 
     public async checkPassword(email: string, password: string) {
         let existingUser = await this.userVerifiedRepository.query("SELECT * FROM user_verified_entity WHERE email = \'" + email + "\'");

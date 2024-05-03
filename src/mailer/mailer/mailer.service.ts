@@ -60,7 +60,7 @@ export class MailerService {
         const subject = 'Road Report: Reset Password';
         const replacements = {
             replaceName: name,
-            passcode: otp.forgotPasswordToken
+            passcode: otp
         };
         const dto: SendEmailDto = {
             from: {name: this.configService.get<string>('APP_NAME'), address: this.configService.get<string>('DEFAULT_MAIL_FROM') },
@@ -88,6 +88,7 @@ export class MailerService {
     }
 
     async sendEmail(dto: SendEmailDto) {
+        console.log(dto);
         const { from, recipients, subject } = dto;
         const html = dto.placeholderReplacements ? this.template(dto.html, dto.placeholderReplacements) : dto.html;
         const transport = this.mailTransport();

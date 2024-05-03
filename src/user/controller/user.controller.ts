@@ -76,7 +76,6 @@ export class UserController {
     @Public()
     @Post('login')
     login(@Body() user: User, @Res({ passthrough: true }) response: Response): Observable<Object> {
-        console.log('hit');
         return this.userService.login(user).pipe(
             map((jwt: string) => {
                 response.cookie('jwt', jwt, { httpOnly: true })
@@ -124,19 +123,10 @@ export class UserController {
     @Post('email/reset-password')
     public async setNewPassword(@Body() resetPassword: ResetPasswordDto) {
         try {
-            if (resetPassword.email && resetPassword.currentPassword) {
-                let isNewPasswordChanged: boolean = false;
-                if (resetPassword && resetPassword.currentPassword) {
-                    isNewPasswordChanged = await this.authService.checkPassword(resetPassword.email, resetPassword.currentPassword);
-                } else {
-                    return 'wrong current password';
-                }
-            }
             if (resetPassword.newPasswordToken) {
                 let forgottenPassword = await this.authService.getForgottenPasswordModel(resetPassword.newPasswordToken);
-                const isNewPasswordChanged = await this.userService.updateVerifiedUser(resetPassword.email, resetPassword.newPassword);
+                const isNewPasswordChanged = this.userService.updateVerifiedUser(resetPassword.email, resetPassword.newPassword);
                 if (isNewPasswordChanged) {
-                    // TODO: remove from forgotten password entity
                     return this.authService.removeForgottenPasswordModel(forgottenPassword);
                 } else {
                     return 'fail';
