@@ -34,6 +34,7 @@ import { CookieMiddleware } from './auth/service/jwt-middleware.service';
     AuthModule,
     ReportModule,
     MailerModule,
+    
   ],
   controllers: [AppController],
   providers: [AppService, ConfigService, TypedEventEmitter],

@@ -13,7 +13,7 @@ export class ReportController {
 
     @Post()
     create(@Headers('withCredentials') withCredentials: string, @Body()report: Report): Observable<Report | Object> {
-        console.log(withCredentials);
+        console.log(report);
         return this.reportService.create(report).pipe(
             map((report: Report) => report),
             catchError(err => of({error: err.message}))

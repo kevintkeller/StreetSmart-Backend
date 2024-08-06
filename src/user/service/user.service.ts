@@ -61,6 +61,7 @@ export class UserService {
     }
 
     public findOneByUsername(user: any): any {
+        console.log(user);
         return this.userVerifiedRepository.query('SELECT verifiedId FROM user_verified_entity WHERE email = \"' + user + '\"');
     }
 
