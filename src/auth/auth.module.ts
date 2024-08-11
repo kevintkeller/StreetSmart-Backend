@@ -11,6 +11,8 @@ import { TypedEventEmitter } from '../event-emitter/typed-event-emitter.class';
 import { UserEntity } from 'src/user/models/user.entity';
 import { UserVerifiedEntity } from 'src/user/models/user-verified.entity';
 import { ForgotPasswordEntity } from './models/forgot-password.entity';
+import { CognitoAuthController } from './cognito-auth.controller';
+import { CognitoAuthService } from './service/cognito-auth.service';
 
 @Module({
     imports: [
@@ -32,6 +34,7 @@ import { ForgotPasswordEntity } from './models/forgot-password.entity';
     ],
     providers: [
         AuthService,
+        CognitoAuthService,
         {
             provide: APP_GUARD,
             useClass: AuthGuard,
@@ -39,6 +42,6 @@ import { ForgotPasswordEntity } from './models/forgot-password.entity';
         TypedEventEmitter
     ],
     exports: [AuthService],
-    controllers: [AuthController]
+    controllers: [AuthController, CognitoAuthController]
 })
 export class AuthModule {}
