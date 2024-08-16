@@ -9,10 +9,15 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { IS_PUBLIC_KEY } from '../decorator/public.decorator';
+import { CognitoAuthService } from 'src/auth/service/cognito-auth.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-    constructor(private jwtService: JwtService, private readonly configService: ConfigService, private reflector: Reflector) {}
+    constructor(private jwtService: JwtService,
+                private readonly configService: ConfigService,
+                private reflector: Reflector,
+                private cognitoAuthService: CognitoAuthService,
+              ) {}
   
     async canActivate(context: ExecutionContext): Promise<boolean> {
       const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
@@ -20,7 +25,6 @@ export class AuthGuard implements CanActivate {
         context.getClass(),
       ]);
       if (isPublic) {
-        // 💡 See this condition
         return true;
       }
 
@@ -31,16 +35,13 @@ export class AuthGuard implements CanActivate {
         throw new UnauthorizedException();
       }
       try {
-        const payload = await this.jwtService.verifyAsync(
-          token,
-          {
-            secret: this.configService.get<string>('JWT_SECRET')
-          }
-        );
+        const payload = await this.cognitoAuthService.validateToken(token);
+
         // 💡 We're assigning the payload to the request object here
         // so that we can access it in our route handlers
         request['user'] = payload;
-      } catch {
+      } catch (error) {
+        console.error('The following exception occurred during authentication: ' + error);
         throw new UnauthorizedException();
       }
       return true;

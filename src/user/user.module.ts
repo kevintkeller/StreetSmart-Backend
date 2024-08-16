@@ -1,15 +1,16 @@
 import { Module } from '@nestjs/common';
 import { UserService } from './service/user.service';
-import { UserController } from './controller/user.controller';
+import { UserController } from './controllers/user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './models/user.entity';
 import { AuthModule } from 'src/auth/auth.module';
-import { AdminController } from './controller/admin.controller';
+import { AdminController } from './controllers/admin.controller';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthGuard } from 'src/common/guard/auth.guard';
 import { UserVerifiedEntity } from './models/user-verified.entity';
 import { ReportContactEntity } from './models/report-contact.entity';
+import { CognitoAdminController } from 'src/auth/controllers/cognito-admin.controller';
 
 @Module({
   imports: [

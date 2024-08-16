@@ -1,8 +1,8 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MiddlewareConsumer, Module } from '@nestjs/common';
+import {  Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './service/auth.service';
-import { AuthController } from './auth.controller';
+import { AuthController } from './controllers/auth.controller';
 import { AuthGuard } from '../common/guard/auth.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -11,8 +11,10 @@ import { TypedEventEmitter } from '../event-emitter/typed-event-emitter.class';
 import { UserEntity } from 'src/user/models/user.entity';
 import { UserVerifiedEntity } from 'src/user/models/user-verified.entity';
 import { ForgotPasswordEntity } from './models/forgot-password.entity';
-import { CognitoAuthController } from './cognito-auth.controller';
+import { CognitoAuthController } from './controllers/cognito-auth.controller';
 import { CognitoAuthService } from './service/cognito-auth.service';
+import { CognitoAdminController } from './controllers/cognito-admin.controller';
+import { CognitoAdminService } from './service/cognito-admin.service';
 
 @Module({
     imports: [
@@ -35,13 +37,14 @@ import { CognitoAuthService } from './service/cognito-auth.service';
     providers: [
         AuthService,
         CognitoAuthService,
+        CognitoAdminService,
         {
             provide: APP_GUARD,
             useClass: AuthGuard,
         },
         TypedEventEmitter
     ],
-    exports: [AuthService],
-    controllers: [AuthController, CognitoAuthController]
+    exports: [AuthService, CognitoAuthService, CognitoAdminService],
+    controllers: [AuthController, CognitoAuthController, CognitoAdminController]
 })
 export class AuthModule {}

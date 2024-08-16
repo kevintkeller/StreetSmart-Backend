@@ -5,12 +5,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../models/user.entity';
 import { Repository } from 'typeorm';
 import { User } from '../models/user.interface';
-import { switchMap, map, catchError, tap } from 'rxjs/operators';
+import { switchMap, map, catchError } from 'rxjs/operators';
 import { EMPTY } from 'rxjs';
 import { UserVerifiedEntity } from '../models/user-verified.entity';
 import { ReportContactEntity } from '../models/report-contact.entity';
 import { ReportContact } from '../models/report-contact.interface';
-import { report } from 'process';
+
 
 @Injectable()
 export class UserService {

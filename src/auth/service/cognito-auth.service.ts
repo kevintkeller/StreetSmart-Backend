@@ -1,11 +1,15 @@
 import { ConfigService } from '@nestjs/config';
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
 import * as AWS from 'aws-sdk';
 import { JwtService } from '@nestjs/jwt';
-import { CognitoUser, CognitoUserPool, AuthenticationDetails, CognitoUserSession, CognitoRefreshToken, CognitoUserAttribute } from 'amazon-cognito-identity-js';
+import { CognitoUser, CognitoUserPool, AuthenticationDetails, CognitoUserSession, CognitoRefreshToken, CognitoUserAttribute, ISignUpResult } from 'amazon-cognito-identity-js';
 import { RegisterUserInput } from '../models/register-user-input.interface';
 import { ConfirmUserInput } from '../models/confirm-user-input.interface';
 import { RefreshTokenInput } from '../models/refresh-token-input.interface';
+import { ConfirmForgotPasswordInput } from '../models/confirm-forgot-password-input.interface';
+import { ForgotPasswordInput } from '../models/forgot-password-input.interface';
+import * as jwt from 'jsonwebtoken';
+import jwksClient from 'jwks-rsa';
 
 @Injectable()
 export class CognitoAuthService {
@@ -13,6 +17,8 @@ export class CognitoAuthService {
     private userPool: CognitoUserPool;
     private cognitoUserPoolId: string;
     private cognitoUserPoolClientId: string
+    private jwksClient: jwksClient.JwksClient;
+
 
     constructor(private configService: ConfigService, private jwtService: JwtService) {
         AWS.config.update({
@@ -24,6 +30,9 @@ export class CognitoAuthService {
         this.userPool = new CognitoUserPool({
             UserPoolId: this.cognitoUserPoolId,
             ClientId: this.cognitoUserPoolClientId,
+        });
+        this.jwksClient = jwksClient({
+            jwksUri: this.configService.get('JWKS_URL'),
         });
     }
 
@@ -52,13 +61,37 @@ export class CognitoAuthService {
         });
     }
 
+    // Validate the token using JWKS
     public async validateToken(token: string): Promise<any> {
         try {
-            const decoded = this.jwtService.verify(token);
+            const decodedHeader = jwt.decode(token, { complete: true });
+            if (!decodedHeader || typeof decodedHeader === 'string') {
+                throw new UnauthorizedException('Invalid token');
+            }
+
+            const key = await this.getKey(decodedHeader.header.kid);
+            if (!key) {
+                throw new UnauthorizedException('Public key not found');
+            }
+
+            const decoded = jwt.verify(token, key.publicKey, { algorithms: ['RS256'] });
             return decoded;
         } catch (error) {
-            throw new Error('Token validation failed due to the following exception: ' + error);
+                throw new UnauthorizedException('Token validation failed: ' + error.message);
         }
+    }
+
+    // Retrieve the public key based on the key ID (kid) from the JWT header
+    private async getKey(kid: string): Promise<{ publicKey: string } | null> {
+        return new Promise((resolve, reject) => {
+            this.jwksClient.getSigningKey(kid, (err, key) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve({ publicKey: key.getPublicKey() });
+                }
+            });
+        });
     }
 
     public async refreshTokens(input: RefreshTokenInput): Promise<CognitoUserSession> {
@@ -112,7 +145,7 @@ export class CognitoAuthService {
         }
     }
 
-    public async registerUser(input: RegisterUserInput): Promise<any> {
+    public async registerUser(input: RegisterUserInput): Promise<ISignUpResult> {
         const { email, phoneNumber, name, password } = input;
     
         // Validate and format the phone number
@@ -176,5 +209,40 @@ export class CognitoAuthService {
             return cleanedPhoneNumber;
         }
         return null;
+    }
+
+    public async forgotPassword(input: ForgotPasswordInput): Promise<void> {
+        const { email } = input;
+        const username = await this.getUsernameByEmail(email);
+        const user = new CognitoUser({
+            Username: username,
+            Pool: this.userPool,
+        });
+
+        return new Promise((resolve, reject) => {
+            user.forgotPassword({
+                onSuccess: () => {
+                    resolve();
+                    console.log('yo waddup')
+                },
+                onFailure: (err) => reject(new BadRequestException('Forgot password failed: ' + err.message)),
+            });
+        });
+    }
+
+    public async confirmForgotPassword(input: ConfirmForgotPasswordInput): Promise<void> {
+        const { email, verificationCode, newPassword } = input;
+        const username = await this.getUsernameByEmail(email);
+        const user = new CognitoUser({
+            Username: username,
+            Pool: this.userPool,
+        });
+
+        return new Promise((resolve, reject) => {
+            user.confirmPassword(verificationCode, newPassword, {
+                onSuccess: () => resolve(),
+                onFailure: (err) => reject(new BadRequestException('Confirm forgot password failed due to the following exception: ' + err.message)),
+            });
+        });
     }
 }
