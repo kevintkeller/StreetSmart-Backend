@@ -145,7 +145,7 @@ export class CognitoAuthService {
         }
     }
 
-    public async registerUser(input: RegisterUserInput): Promise<ISignUpResult> {
+    public async registerUser(input: RegisterUserInput): Promise<boolean> {
         const { email, phoneNumber, name, password } = input;
     
         // Validate and format the phone number
@@ -170,7 +170,7 @@ export class CognitoAuthService {
                   reject(new BadRequestException('Registration failed: ' + err.message));
                 }
             } else {
-                resolve(result);
+                resolve(true);
             }
           });
         });

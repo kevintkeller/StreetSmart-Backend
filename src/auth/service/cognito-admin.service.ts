@@ -14,7 +14,6 @@ export class CognitoAdminService {
     public async isUserInGroup(username: string, userPoolId: string, groupName: string): Promise<boolean> {
 
         try {
-            console.log('bruh ' + userPoolId);
             // Define the parameters for the API call
             const params = {
                 UserPoolId: userPoolId,

@@ -16,7 +16,7 @@ export class CognitoAuthController {
 
     @Public()
     @Post('login')
-    public async login(@Body() body: { email: string; password: string }, @Res({ passthrough: true }) response: Response) {
+    public async login(@Body() body: { email: string; password: string }, @Res({ passthrough: true }) response: Response): Promise<boolean> {
         try {
             const session = await this.cognitoAuthService.authenticateUser(body.email, body.password);
 
@@ -30,15 +30,16 @@ export class CognitoAuthController {
                 maxAge: 3600000,  // Cookie expiration time (1 hour in milliseconds)
             });
 
-            return { result: 'Success' };
+            return true;
         } catch (error) {
             throw new HttpException('Incorrect Username or Password', HttpStatus.UNAUTHORIZED);
+            return false;
         }
     }
 
     @Public()
     @Post('register')
-    public async register(@Body() body: RegisterUserInput) {
+    public async register(@Body() body: RegisterUserInput): Promise<boolean> {
         const result = await this.cognitoAuthService.registerUser(body);
         return result;
     }

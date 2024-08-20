@@ -1,14 +1,28 @@
-import { Controller, Get, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
 import { Roles } from "src/common/decorator/roles.decorator";
 import { RolesGuard } from "src/common/guard/roles.guard";
+import { CognitoAdminService } from "../service/cognito-admin.service";
+import { CognitoAuthService } from "../service/cognito-auth.service";
+import { ConfigService } from "@nestjs/config";
+
 
 @Controller('cognito-admin')
 @UseGuards(RolesGuard)
 export class CognitoAdminController {
 
+    constructor(private cognitoAdminService: CognitoAdminService,
+                private cognitoAuthService: CognitoAuthService,
+                private configService: ConfigService) {}
+
     @Get()
     @Roles('admin')
     public getAdminData() {
         return 'admin data';
+    }
+
+    @Post('is-admin')
+    public async getIsAdmin(@Body() body: {email: string}): Promise<boolean> {
+        const username: string = await this.cognitoAuthService.getUsernameByEmail(body.email);
+        return await this.cognitoAdminService.isUserInGroup(username, this.configService.get('COGNITO_USER_POOL_ID'), this.configService.get('ROLES_GROUP_NAME'));
     }
 }
