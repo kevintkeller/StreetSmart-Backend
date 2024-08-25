@@ -134,8 +134,7 @@ export class CognitoAuthService {
 
         try {
             const response = await this.cognito.listUsers(params).promise();
-
-            if ((await response).Users.length > 0) {
+            if ((response).Users.length > 0) {
                 return response.Users[0].Username;
             } else {
                 return null;

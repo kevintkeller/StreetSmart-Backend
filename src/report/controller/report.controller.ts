@@ -5,6 +5,7 @@ import { Observable, catchError, map, of } from 'rxjs';
 import { ReportEntity } from '../models/report.entity';
 import { Public } from 'src/common/decorator/public.decorator';
 import { Request } from 'express';
+import { ReportContact } from '../models/report-contact.interface';
 
 @Controller('report')
 export class ReportController {
@@ -44,4 +45,9 @@ export class ReportController {
         this.reportService.updateOne(report.id, report.reportStatus);
     }
 
+    @Public()
+    @Get('get-all-report-contacts')
+    public async getAllReportContacts(@Body() body: { cityId }): Promise<ReportContact[]> {
+        return await this.reportService.getAllReportContacts(body.cityId);
+    }
 }

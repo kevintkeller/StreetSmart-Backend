@@ -8,8 +8,6 @@ import { User } from '../models/user.interface';
 import { switchMap, map, catchError } from 'rxjs/operators';
 import { EMPTY } from 'rxjs';
 import { UserVerifiedEntity } from '../models/user-verified.entity';
-import { ReportContactEntity } from '../models/report-contact.entity';
-import { ReportContact } from '../models/report-contact.interface';
 
 
 @Injectable()
@@ -17,7 +15,6 @@ export class UserService {
 
     constructor(@InjectRepository(UserEntity) private readonly userRepository: Repository<UserEntity>,
                     @InjectRepository(UserVerifiedEntity) private readonly userVerifiedRepository: Repository<UserVerifiedEntity>,
-                    @InjectRepository(ReportContactEntity) private readonly reportContactRepository: Repository<ReportContact>,
                     private authService: AuthService) {}
 
     public create(user: User): Observable<User> {
@@ -43,13 +40,13 @@ export class UserService {
         return hashed;
     }
 
-    public addReportContact(reportContact: ReportContact) {
-        return from(this.reportContactRepository.save(reportContact)).pipe(
-            map((contact: ReportContact) => {
-                return contact;
-            })
-        )
-    }
+    // public addReportContact(reportContact: ReportContact) {
+    //     return from(this.reportContactRepository.save(reportContact)).pipe(
+    //         map((contact: ReportContact) => {
+    //             return contact;
+    //         })
+    //     )
+    // }
 
     public findOneBy(id: number): Observable<User> {
         return from(this.userVerifiedRepository.findOneBy({id})).pipe(
@@ -149,17 +146,7 @@ export class UserService {
         return this.userVerifiedRepository.query('UPDATE user_verified_entity SET adminFlg = 1 ' + ' WHERE email = \"' + email + '\"');
     }
 
-    public updateReportContact(contactId: number, email: string, reportType: string) {
-        return this.reportContactRepository.query('UPDATE report_contact_entity SET email = \"' + email + '\", ' + 'reportType = \"' + reportType + '\" WHERE contactId = ' + contactId);
-    }
-
-    public getAllReportContacts(): Observable<ReportContact[]> {
-        return from(this.reportContactRepository.find()).pipe(
-            map((reportContacts) => {
-                return reportContacts;
-            })
-        );
-    }
-
-
+    // public updateReportContact(contactId: number, email: string, reportType: string) {
+    //     return this.reportContactRepository.query('UPDATE report_contact_entity SET email = \"' + email + '\", ' + 'reportType = \"' + reportType + '\" WHERE contactId = ' + contactId);
+    // }
 }

@@ -1,14 +1,17 @@
+import { Param } from '@nestjs/common';
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class ReportContactEntity {
-
+export class ReportTypesEntity {
     @PrimaryGeneratedColumn()
-    contactId: number;
+    reportTypeId: number;
+
+    @Column()
+    cityId: number;
 
     @Column()
     reportType: string;
 
     @Column()
-    email: string;
+    description: string;
 }

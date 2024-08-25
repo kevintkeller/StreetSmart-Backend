@@ -5,7 +5,6 @@ import { User } from '../models/user.interface';
 import { Public } from 'src/common/decorator/public.decorator';
 import { UserEntity } from '../models/user.entity';
 import { UserVerifiedEntity } from '../models/user-verified.entity';
-import { ReportContact } from '../models/report-contact.interface';
 
 @Controller('admin')
 export class AdminController {
@@ -30,23 +29,17 @@ export class AdminController {
         return this.userService.updateAdmin(body.email);
     }
 
-    @Public()
-    @Get('getAllReportContacts')
-    getAllReportContacts(): Observable<ReportContact[]> {
-        return this.userService.getAllReportContacts();
-    }
+    // @Public()
+    // @Post('addNewReportContact')
+    // addNewReportContact(@Body() body: ReportContact) {
+    //     return this.userService.addReportContact(body);
+    // }
 
-    @Public()
-    @Post('addNewReportContact')
-    addNewReportContact(@Body() body: ReportContact) {
-        return this.userService.addReportContact(body);
-    }
-
-    @Public()
-    @Post('updateReportContact')
-    updateReportContact(@Body()body: any) {
-        return this.userService.updateReportContact(body.contactId, body.email, body.reportType);
-    }
+    // @Public()
+    // @Post('updateReportContact')
+    // updateReportContact(@Body()body: any) {
+    //     return this.userService.updateReportContact(body.contactId, body.email, body.reportType);
+    // }
 
 
 }

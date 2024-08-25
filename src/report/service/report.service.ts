@@ -4,13 +4,16 @@ import { ReportEntity } from '../models/report.entity';
 import { Double, Repository } from 'typeorm';
 import { Report } from '../models/report.interface';
 import { Observable, map, switchMap, catchError, throwError, from, EMPTY } from 'rxjs';
+import { ReportContactEntity } from '../models/report-contact.entity';
+import { ReportContact } from '../models/report-contact.interface';
 
 
 @Injectable()
 export class ReportService {
 
     constructor(
-        @InjectRepository(ReportEntity) private readonly reportRepository: Repository<ReportEntity>
+        @InjectRepository(ReportEntity) private readonly reportRepository: Repository<ReportEntity>,
+        @InjectRepository(ReportContactEntity) private readonly reportContactRepository: Repository<ReportContactEntity>
     ){}
 
     public create(report: Report): Observable<void | Report> {
@@ -56,5 +59,10 @@ export class ReportService {
     public updateOne(id: number, reportStatus: number): any {
         this.reportRepository.query("UPDATE report_entity SET reportStatus = " + reportStatus + " WHERE reportId = " + id);
     }
+
+    public async getAllReportContacts(cityId: number): Promise<ReportContact[]> {
+        return this.reportContactRepository.query("SELECT * FROM report_contact_entity WHERE cityId = " + cityId);
+    }
+
 
 }

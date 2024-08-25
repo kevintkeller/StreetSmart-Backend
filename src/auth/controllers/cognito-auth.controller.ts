@@ -69,4 +69,5 @@ export class CognitoAuthController {
     public async refreshTokens(@Body() input: RefreshTokenInput) {
         return this.cognitoAuthService.refreshTokens(input);
     }
+
 }
