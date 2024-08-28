@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Headers } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Headers, Query } from '@nestjs/common';
 import { ReportService } from '../service/report.service';
 import { Report } from '../models/report.interface';
 import { Observable, catchError, map, of } from 'rxjs';
@@ -6,6 +6,8 @@ import { ReportEntity } from '../models/report.entity';
 import { Public } from 'src/common/decorator/public.decorator';
 import { Request } from 'express';
 import { ReportContact } from '../models/report-contact.interface';
+import { ReportTypes } from '../models/report-types.interface';
+import { ReportStatus } from '../models/report-status.interface';
 
 @Controller('report')
 export class ReportController {
@@ -22,7 +24,7 @@ export class ReportController {
     }
 
     @Public()
-    @Get(':reportId')
+    @Get('get-report-by-report-id')
     findOneBy(@Param()params: any) {
         return this.reportService.findOneBy(params.reportId);
     }
@@ -47,7 +49,26 @@ export class ReportController {
 
     @Public()
     @Get('get-all-report-contacts')
-    public async getAllReportContacts(@Body() body: { cityId }): Promise<ReportContact[]> {
-        return await this.reportService.getAllReportContacts(body.cityId);
+    public async getAllReportContacts(
+        @Query('cityId') cityId: number, 
+        @Query('email') email: string
+    ): Promise<ReportContact[]> {
+        return await this.reportService.getAllReportContacts(cityId, email);
+    }
+
+    @Public()
+    @Get('get-all-report-types')
+    public async getAllReportTypes(
+        @Query('cityId') cityId: number
+    ): Promise<ReportTypes[]> {
+        return await this.reportService.getAllReportTypes(cityId);
+    }
+
+    @Public()
+    @Get('get-all-report-statuses')
+    public async getAllReportStatuses(
+        @Query() cityId: number
+    ): Promise<ReportStatus[]> {
+        return await this.reportService.getAllReportStatuses(cityId);
     }
 }

@@ -50,7 +50,7 @@ export class CognitoAdminService {
         return true;
     }
 
-    public async getAllAdmins(userPoolId: string, groupName: string): Promise<AdminUser[]> {
+    public async getAllAdmins(userPoolId: string, groupName: string, cityIdFilter: number): Promise<AdminUser[]> {
         let adminUsers: AdminUser[] = [];
         let nextToken: string | undefined;
 
@@ -68,11 +68,13 @@ export class CognitoAdminService {
                         // Extracting the attributes
                         const nameAttr = user.Attributes?.find(attr => attr.Name === 'name');
                         const emailAttr = user.Attributes?.find(attr => attr.Name === 'email');
-                        
+                        const cityIdAttr = user.Attributes?.find(attr => attr.Name === 'custom:cityId');
+
                         // Construct the AdminUser object
                         return {
                             name: nameAttr ? nameAttr.Value : '',
                             email: emailAttr ? emailAttr.Value : '',
+                            cityId: cityIdAttr ? parseInt(cityIdAttr.Value, 10) : 0,
                             roles: [groupName] // Assuming the role is inferred from the group
                         };
                     }));
@@ -84,6 +86,8 @@ export class CognitoAdminService {
             }
         } while (nextToken);
 
-        return adminUsers;
+        const filteredAdmins = adminUsers.filter(user => user.cityId === cityIdFilter);
+
+        return filteredAdmins;
     }
 }

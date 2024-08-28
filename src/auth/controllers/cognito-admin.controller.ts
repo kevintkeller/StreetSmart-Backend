@@ -37,6 +37,6 @@ export class CognitoAdminController {
     @Get('all-admins')
     @Roles('admin')
     public async getAllAdmins(@Body() body: {cityId: number}): Promise<AdminUser[]> {
-        return await this.cognitoAdminService.getAllAdmins(this.configService.get('COGNITO_USER_POOL_ID'), this.configService.get('ROLES_GROUP_NAME'));
+        return await this.cognitoAdminService.getAllAdmins(this.configService.get('COGNITO_USER_POOL_ID'), this.configService.get('ROLES_GROUP_NAME'), 0);
     }
 }

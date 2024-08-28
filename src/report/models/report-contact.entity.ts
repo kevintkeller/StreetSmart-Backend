@@ -7,4 +7,7 @@ export class ReportContactEntity {
 
     @Column()
     reportTypeId: number;
+
+    @Column()
+    cityId: number;
 }
