@@ -15,6 +15,9 @@ import { CognitoAuthController } from './controllers/cognito-auth.controller';
 import { CognitoAuthService } from './service/cognito-auth.service';
 import { CognitoAdminController } from './controllers/cognito-admin.controller';
 import { CognitoAdminService } from './service/cognito-admin.service';
+import { CityEntity } from './models/city.entity';
+import { CityZipEntity } from './models/city-zip.entity';
+import { CityService } from './service/city.service';
 
 @Module({
     imports: [
@@ -33,11 +36,14 @@ import { CognitoAdminService } from './service/cognito-admin.service';
         TypeOrmModule.forFeature([UserEntity]),
         TypeOrmModule.forFeature([UserVerifiedEntity]),
         TypeOrmModule.forFeature([ForgotPasswordEntity]),
+        TypeOrmModule.forFeature([CityEntity]),
+        TypeOrmModule.forFeature([CityZipEntity])
     ],
     providers: [
         AuthService,
         CognitoAuthService,
         CognitoAdminService,
+        CityService,
         {
             provide: APP_GUARD,
             useClass: AuthGuard,

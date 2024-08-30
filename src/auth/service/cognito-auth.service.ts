@@ -10,6 +10,7 @@ import { ConfirmForgotPasswordInput } from '../models/confirm-forgot-password-in
 import { ForgotPasswordInput } from '../models/forgot-password-input.interface';
 import * as jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
+import { CityService } from './city.service';
 
 @Injectable()
 export class CognitoAuthService {
@@ -20,7 +21,7 @@ export class CognitoAuthService {
     private jwksClient: jwksClient.JwksClient;
 
 
-    constructor(private configService: ConfigService, private jwtService: JwtService) {
+    constructor(private configService: ConfigService, private jwtService: JwtService, private cityService: CityService) {
         AWS.config.update({
             region: 'us-east-1',
         });
@@ -145,35 +146,44 @@ export class CognitoAuthService {
     }
 
     public async registerUser(input: RegisterUserInput): Promise<boolean> {
-        const { email, phoneNumber, name, password } = input;
+        const { email, phoneNumber, name, password, zipCode } = input;
     
         // Validate and format the phone number
         const formattedPhoneNumber = this.formatPhoneNumber(phoneNumber);
+        const cityId = await this.cityService.getCityIdByZipCode(zipCode);
+        console.log(cityId);
     
         if (!formattedPhoneNumber) {
-          throw new BadRequestException('Invalid phone number format.');
+            throw new BadRequestException('Invalid phone number format.');
+        }
+
+        if (!cityId) {
+            throw new BadRequestException('The zip entered was invalid or not associated with a registered city');
         }
     
         return new Promise((resolve, reject) => {
-          const attributeList = [
-            new CognitoUserAttribute({ Name: 'email', Value: email }),
-            new CognitoUserAttribute({ Name: 'phone_number', Value: formattedPhoneNumber }),
-            new CognitoUserAttribute({ Name: 'name', Value: name }),
-          ];
-    
-          this.userPool.signUp(email, password, attributeList, [], (err, result) => {
-            if (err) {
-                if (err.message.includes('UsernameExistsException')) {
-                  reject(new BadRequestException('User with this email already exists.'));
+            const attributeList = [
+                new CognitoUserAttribute({ Name: 'email', Value: email }),
+                new CognitoUserAttribute({ Name: 'phone_number', Value: formattedPhoneNumber }),
+                new CognitoUserAttribute({ Name: 'name', Value: name }),
+                new CognitoUserAttribute({ Name: 'custom:zipCode', Value: zipCode }),
+                new CognitoUserAttribute({ Name: 'custom:cityId', Value: cityId.toString() })
+            ];
+
+            this.userPool.signUp(email, password, attributeList, [], (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (err.message.includes('UsernameExistsException')) {
+                        reject(new BadRequestException('User with this email already exists.'));
+                    } else {
+                        reject(new BadRequestException('Registration failed: ' + err.message));
+                    }
                 } else {
-                  reject(new BadRequestException('Registration failed: ' + err.message));
+                    resolve(true);
                 }
-            } else {
-                resolve(true);
-            }
-          });
+            });
         });
-      }
+    }
 
     public async confirmUser(input: ConfirmUserInput): Promise<void> {
         const { email, confirmationCode } = input;
@@ -222,7 +232,6 @@ export class CognitoAuthService {
             user.forgotPassword({
                 onSuccess: () => {
                     resolve();
-                    console.log('yo waddup')
                 },
                 onFailure: (err) => reject(new BadRequestException('Forgot password failed: ' + err.message)),
             });

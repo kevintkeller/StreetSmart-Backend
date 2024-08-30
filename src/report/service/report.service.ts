@@ -66,10 +66,30 @@ export class ReportService {
     }
 
     public async getAllReportTypes(cityId: number): Promise<ReportTypes[]> {
-        // return this.reportTypesRepository.query("SELECT * FROM report_types_entity WHERE cityId = " + cityId);
         return this.reportTypesRepository.createQueryBuilder('report_types_entity')
             .where('report_types_entity.cityId = :cityId', { cityId })
             .getMany();
+    }
+
+    public async deleteReportType(reportTypeId: number): Promise<boolean> {
+        try {
+            const result = await this.reportTypesRepository.delete(reportTypeId);
+            return result.affected > 0;
+        } catch (error) {
+            console.error('Error deleting report status', error);
+            return false;
+        }
+    }
+
+    public async createOrUpdateReportType(reportType: ReportTypes): Promise<boolean> {
+        try {
+            const result = await this.reportTypesRepository.save(reportType);
+
+            return result ? true : false;
+        } catch (error) {
+            console.error('Error creating new report type', error);
+            return false;
+        }
     }
 
     public async getAllReportContacts(cityId: number, email: string): Promise<ReportContact[]> {
@@ -79,9 +99,50 @@ export class ReportService {
             .getMany();
     }
 
+    public async deleteReportContact(reportContactId: number): Promise<boolean> {
+        try {
+            const result = await this.reportContactRepository.delete(reportContactId);
+            return result.affected > 0;
+        } catch (error) {
+            console.error('Error deleting report status', error);
+            return false;
+        }
+    }
+
+    public async createReportContact(reportContact: ReportContact): Promise<boolean> {
+        try {
+            const result = await this.reportContactRepository.save(reportContact);
+            return result ? true : false;
+        } catch (error) {
+            console.error('Error creating new report contact', error);
+            return false;
+        }
+    }
+
     public async getAllReportStatuses(cityId: number): Promise<ReportStatus[]> {
-        return await this.reportStatusesRepository.createQueryBuilder('report_statuses_entity')
-            .where('report_statuses_entity.cityId = :cityId', { cityId })
+        return await this.reportStatusesRepository.createQueryBuilder('report_status_entity')
+            .where('report_status_entity.cityId = :cityId', { cityId })
             .getMany();
     }
+
+    public async deleteReportStatus(reportStatusId: number): Promise<boolean> {
+        try {
+            const result = await this.reportStatusesRepository.delete(reportStatusId);
+            return result.affected > 0;
+        } catch (error) {
+            console.error('Error deleting report status', error);
+            return false;
+        }
+    }
+
+    public async createOrUpdateReportStatus(reportStatus: ReportStatus): Promise<boolean> {
+        try {
+            const result = await this.reportStatusesRepository.save(reportStatus);
+            return result ? true : false;
+        } catch (error) {
+            console.error('Error creating new report status', error);
+            return false;
+        }
+    }
+
 }

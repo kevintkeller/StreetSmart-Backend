@@ -1,8 +1,12 @@
-import { Column, Entity, PrimaryColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class ReportContactEntity {
-    @PrimaryColumn()
+    
+    @PrimaryGeneratedColumn()
+    reportContactId: number;
+
+    @Column()
     email: string;
 
     @Column()

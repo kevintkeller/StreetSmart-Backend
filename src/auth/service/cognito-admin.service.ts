@@ -69,12 +69,14 @@ export class CognitoAdminService {
                         const nameAttr = user.Attributes?.find(attr => attr.Name === 'name');
                         const emailAttr = user.Attributes?.find(attr => attr.Name === 'email');
                         const cityIdAttr = user.Attributes?.find(attr => attr.Name === 'custom:cityId');
+                        const zipAttr = user.Attributes?.find(attr => attr.Name === 'custom:zipCode');
 
                         // Construct the AdminUser object
                         return {
                             name: nameAttr ? nameAttr.Value : '',
                             email: emailAttr ? emailAttr.Value : '',
                             cityId: cityIdAttr ? parseInt(cityIdAttr.Value, 10) : 0,
+                            zipCode: zipAttr ? zipAttr.Value : '',
                             roles: [groupName] // Assuming the role is inferred from the group
                         };
                     }));
@@ -89,5 +91,22 @@ export class CognitoAdminService {
         const filteredAdmins = adminUsers.filter(user => user.cityId === cityIdFilter);
 
         return filteredAdmins;
+    }
+
+    public async removeAdminStatus(username: string, userPoolId: string, groupName: string): Promise<boolean> {
+        const isInGroup = await this.isUserInGroup(username, userPoolId, groupName);
+
+        if (!isInGroup) {
+            return false;
+        }
+
+        const params = {
+            UserPoolId: userPoolId,
+            Username: username,
+            GroupName: groupName
+        };
+
+        await this.cognitoIdentityServiceProvider.adminRemoveUserFromGroup(params).promise();
+        return true;
     }
 }

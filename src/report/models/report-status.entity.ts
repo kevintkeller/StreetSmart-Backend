@@ -13,4 +13,7 @@ export class ReportStatusEntity {
 
     @Column()
     description: string;
+
+    @Column()
+    hexColorValue: string;
 }

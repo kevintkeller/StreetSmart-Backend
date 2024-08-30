@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
 import { Roles } from "src/common/decorator/roles.decorator";
 import { RolesGuard } from "src/common/guard/roles.guard";
 import { CognitoAdminService } from "../service/cognito-admin.service";
@@ -36,7 +36,14 @@ export class CognitoAdminController {
 
     @Get('all-admins')
     @Roles('admin')
-    public async getAllAdmins(@Body() body: {cityId: number}): Promise<AdminUser[]> {
-        return await this.cognitoAdminService.getAllAdmins(this.configService.get('COGNITO_USER_POOL_ID'), this.configService.get('ROLES_GROUP_NAME'), 0);
+    public async getAllAdmins(@Query('cityId') cityId: string): Promise<AdminUser[]> {
+        return await this.cognitoAdminService.getAllAdmins(this.configService.get('COGNITO_USER_POOL_ID'), this.configService.get('ROLES_GROUP_NAME'), parseInt(cityId, 10));
+    }
+
+    @Post('remove-admin')
+    @Roles('admin')
+    public async removeAdminStatus(@Body() body: {email: string}): Promise<boolean> {
+        const username: string = await this.cognitoAuthService.getUsernameByEmail(body.email);
+        return await this.cognitoAdminService.removeAdminStatus(username, this.configService.get('COGNITO_USER_POOL_ID'), this.configService.get('ROLES_GROUP_NAME'));
     }
 }

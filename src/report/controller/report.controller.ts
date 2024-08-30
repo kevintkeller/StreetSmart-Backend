@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Headers, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Headers, Query, ParseIntPipe } from '@nestjs/common';
 import { ReportService } from '../service/report.service';
 import { Report } from '../models/report.interface';
 import { Observable, catchError, map, of } from 'rxjs';
@@ -57,6 +57,22 @@ export class ReportController {
     }
 
     @Public()
+    @Post('delete-report-contact')
+    public async deleteReportContact(
+        @Query('reportContactId', ParseIntPipe) reportContactId: number
+    ): Promise<boolean> {
+        return await this.reportService.deleteReportContact(reportContactId);
+    }
+
+    @Public()
+    @Post('create-report-contact')
+    public async createReportContact(
+        @Body() body: ReportContact
+    ): Promise<boolean> {
+        return await this.reportService.createReportContact(body);
+    }
+
+    @Public()
     @Get('get-all-report-types')
     public async getAllReportTypes(
         @Query('cityId') cityId: number
@@ -65,10 +81,42 @@ export class ReportController {
     }
 
     @Public()
+    @Post('delete-report-type')
+    public async deleteReportType(
+        @Query('reportTypeId', ParseIntPipe) reportTypeId: number
+    ): Promise<boolean> {
+        return await this.reportService.deleteReportType(reportTypeId);
+    }
+
+    @Public()
+    @Post('create-or-update-report-type')
+    public async createOrUpdateReportType(
+        @Body() body: ReportTypes
+    ): Promise<boolean> {
+        return await this.reportService.createOrUpdateReportType(body);
+    }
+
+    @Public()
     @Get('get-all-report-statuses')
     public async getAllReportStatuses(
-        @Query() cityId: number
+        @Query('cityId') cityId: number
     ): Promise<ReportStatus[]> {
         return await this.reportService.getAllReportStatuses(cityId);
+    }
+
+    @Public()
+    @Post('delete-report-status')
+    public async deleteReportStatus(
+        @Query('reportStatusId', ParseIntPipe) reportStatusId: number
+    ): Promise<boolean> {
+        return await this.reportService.deleteReportStatus(reportStatusId);
+    }
+
+    @Public()
+    @Post('create-or-update-report-status')
+    public async createReportStatus(
+        @Body() body: ReportStatus
+    ): Promise<boolean> {
+        return await this.reportService.createOrUpdateReportStatus(body);
     }
 }

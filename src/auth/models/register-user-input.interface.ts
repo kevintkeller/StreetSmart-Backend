@@ -3,4 +3,5 @@ export interface RegisterUserInput {
     phoneNumber: string;
     name: string;
     password: string;
+    zipCode: string;
 }
