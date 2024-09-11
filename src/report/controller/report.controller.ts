@@ -4,7 +4,6 @@ import { Report } from '../models/report.interface';
 import { Observable, catchError, map, of } from 'rxjs';
 import { ReportEntity } from '../models/report.entity';
 import { Public } from 'src/common/decorator/public.decorator';
-import { Request } from 'express';
 import { ReportContact } from '../models/report-contact.interface';
 import { ReportTypes } from '../models/report-types.interface';
 import { ReportStatus } from '../models/report-status.interface';
@@ -51,9 +50,8 @@ export class ReportController {
     @Get('get-all-report-contacts')
     public async getAllReportContacts(
         @Query('cityId') cityId: number, 
-        @Query('email') email: string
     ): Promise<ReportContact[]> {
-        return await this.reportService.getAllReportContacts(cityId, email);
+        return await this.reportService.getAllReportContacts(cityId);
     }
 
     @Public()

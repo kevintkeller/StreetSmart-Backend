@@ -32,7 +32,6 @@ export class CognitoAuthController {
 
             return true;
         } catch (error) {
-            throw new HttpException('Incorrect Username or Password', HttpStatus.UNAUTHORIZED);
             return false;
         }
     }

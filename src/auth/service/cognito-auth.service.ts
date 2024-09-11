@@ -39,6 +39,7 @@ export class CognitoAuthService {
 
     public async authenticateUser(email: string, password: string): Promise<any> {
         const username = await this.getUsernameByEmail(email);
+        console.log(this.configService.get('COGNITO_USER_POOL_ID'));
 
         if (!username) {
             throw new Error('User not found.');
@@ -131,6 +132,7 @@ export class CognitoAuthService {
         const params = {
             UserPoolId: this.cognitoUserPoolId,
             Filter: `email = "${email}"`,
+            Limit: 1,
         };
 
         try {

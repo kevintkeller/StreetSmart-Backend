@@ -92,10 +92,9 @@ export class ReportService {
         }
     }
 
-    public async getAllReportContacts(cityId: number, email: string): Promise<ReportContact[]> {
+    public async getAllReportContacts(cityId: number): Promise<ReportContact[]> {
         return await this.reportContactRepository.createQueryBuilder('report_contact_entity')
             .where('report_contact_entity.cityId = :cityId', { cityId })
-            .andWhere('report_contact_entity.email = :email', { email })
             .getMany();
     }
 
