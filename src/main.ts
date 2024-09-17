@@ -13,7 +13,7 @@ async function bootstrap() {
   app.use(urlencoded({extended: true, limit: '50mb'}));
   const corsOptions ={
       // origin:'http://localhost:4200',
-      origin: 'https://colinsbranch.d1c3z3emaq6hyt.amplifyapp.com',
+      origin: 'https://streetsmartweb.com',
       credentials:true,
       optionSuccessStatus:200
   }
