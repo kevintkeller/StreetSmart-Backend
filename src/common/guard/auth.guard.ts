@@ -29,6 +29,7 @@ export class AuthGuard implements CanActivate {
       }
 
       const request = context.switchToHttp().getRequest();
+
       const token = this.extractTokenFromHeader(request);
 
       if (!token) {
@@ -36,7 +37,6 @@ export class AuthGuard implements CanActivate {
       }
       try {
         const payload = await this.cognitoAuthService.validateToken(token);
-
         // 💡 We're assigning the payload to the request object here
         // so that we can access it in our route handlers
         request['user'] = payload;

@@ -8,7 +8,7 @@ export class CookieMiddleware implements NestMiddleware {
 
     cookieParser()(req, res, (err) => {
       if (err) {
-        console.log(err);
+        console.error(err);
       }
 
       const cookieValue = req.cookies['jwt'];

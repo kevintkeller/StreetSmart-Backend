@@ -171,13 +171,9 @@ export class AuthService {
           order: { timeStamp: 'DESC' },
         });
     
-        console.log(forgottenPassword);
-    
         if (forgottenPassword.length > 0 && ((new Date().getTime() - forgottenPassword[0].timeStamp.getTime()) / 60000 < 0.5)) {
-          console.log('here we go dawg');
           throw new HttpException('LOGIN.EMAIL_SENT_RECENTLY', HttpStatus.INTERNAL_SERVER_ERROR);
         } else {
-          console.log('spaghetti');
           const forgotPasswordToken = (Math.floor(Math.random() * (9000000)) + 1000000).toString();
           const newForgotPassword = this.forgotPasswordRepository.create({
             email: email,

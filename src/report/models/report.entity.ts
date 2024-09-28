@@ -19,13 +19,23 @@ export class ReportEntity {
     longitude: Double;
     
     @Column()
-    userId: number;
+    userEmail: string;
 
     @Column()
-    reportStatus: number;
+    reportStatusId: number;
 
-    @Column({
-        type: "longblob",
-    })
+    @Column()
+    reportTypeId: number;
+
+    @Column()
+    createdDate: Date;
+
+    @Column({ nullable: true })
+    resolvedDate: Date;
+
+    @Column()
+    cityId: number;
+
+    @Column({ type: "longblob" })
     imageData: string;
 }

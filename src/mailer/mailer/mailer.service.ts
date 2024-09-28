@@ -88,7 +88,6 @@ export class MailerService {
     }
 
     async sendEmail(dto: SendEmailDto) {
-        console.log(dto);
         const { from, recipients, subject } = dto;
         const html = dto.placeholderReplacements ? this.template(dto.html, dto.placeholderReplacements) : dto.html;
         const transport = this.mailTransport();
@@ -107,7 +106,7 @@ export class MailerService {
             const result = await transport.sendMail(options);
             return result;
         } catch (error) {
-            console.log(error);
+            console.error(error);
             return error;
         }
     }

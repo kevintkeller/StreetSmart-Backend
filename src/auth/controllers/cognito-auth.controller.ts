@@ -25,13 +25,15 @@ export class CognitoAuthController {
 
             response.cookie('jwt', jwt, {
                 httpOnly: true,  // Cookie accessible only by the web server
-                secure: process.env.NODE_ENV === 'production',  // Use secure cookies in production
-                sameSite: 'strict',  // Strict cookie policy
+                //secure: process.env.NODE_ENV === 'production',  // Use secure cookies in production
+                secure: true,
+                sameSite: 'none',  // Strict cookie policy
                 maxAge: 3600000,  // Cookie expiration time (1 hour in milliseconds)
             });
 
             return true;
         } catch (error) {
+            console.error(error);
             return false;
         }
     }

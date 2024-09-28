@@ -6,7 +6,11 @@ export interface Report {
     content?: string;
     latitude?: Double;
     longitude?: Double;
-    userId?: number;
-    reportStatus?: number;
+    userEmail?: string;
+    reportStatusId?: number;
+    reportTypeId?: number;
+    createdDate?: Date;
+    resolvedDate?: Date;
+    cityId?: number;
     imageData?: string;
 }

@@ -39,7 +39,6 @@ export class CognitoAuthService {
 
     public async authenticateUser(email: string, password: string): Promise<any> {
         const username = await this.getUsernameByEmail(email);
-        console.log(this.configService.get('COGNITO_USER_POOL_ID'));
 
         if (!username) {
             throw new Error('User not found.');
@@ -153,7 +152,6 @@ export class CognitoAuthService {
         // Validate and format the phone number
         const formattedPhoneNumber = this.formatPhoneNumber(phoneNumber);
         const cityId = await this.cityService.getCityIdByZipCode(zipCode);
-        console.log(cityId);
     
         if (!formattedPhoneNumber) {
             throw new BadRequestException('Invalid phone number format.');
@@ -174,7 +172,6 @@ export class CognitoAuthService {
 
             this.userPool.signUp(email, password, attributeList, [], (err, result) => {
                 if (err) {
-                    console.log(err);
                     if (err.message.includes('UsernameExistsException')) {
                         reject(new BadRequestException('User with this email already exists.'));
                     } else {

@@ -21,8 +21,8 @@ export class RolesGuard implements CanActivate {
         }
 
         const request = context.switchToHttp().getRequest();
+
         const user = request.user; // Ensure the user object is set (typically by a JWT strategy)
-        console.log(JSON.stringify(user));
 
         const username = await this.cognitoAuthService.getUsernameByEmail(user.email);
         
