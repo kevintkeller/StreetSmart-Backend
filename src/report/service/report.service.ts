@@ -23,6 +23,7 @@ export class ReportService {
 
     public async createNewReport(report: Report): Promise<boolean> {
         try {
+            report.resolvedDate = null;
             const result = await this.reportRepository.save(report);
             return result ? true : false;
         } catch (error) {

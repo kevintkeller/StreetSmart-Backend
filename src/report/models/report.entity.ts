@@ -32,10 +32,10 @@ export class ReportEntity {
 
     @Column({ nullable: true })
     resolvedDate: Date;
+    
+    @Column({ type: "longblob" })
+    imageData: string;
 
     @Column()
     cityId: number;
-
-    @Column({ type: "longblob" })
-    imageData: string;
 }

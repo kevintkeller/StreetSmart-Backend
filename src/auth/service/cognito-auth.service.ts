@@ -146,6 +146,32 @@ export class CognitoAuthService {
         }
     }
 
+    public async getCityIdByEmail(email: string): Promise<string | null> {
+        const params = {
+            UserPoolId: this.cognitoUserPoolId,
+            Filter: `email = "${email}"`,
+            Limit: 1,
+        };
+    
+        try {
+            const response = await this.cognito.listUsers(params).promise();
+            if (response.Users.length > 0) {
+                const userAttributes = response.Users[0].Attributes;
+    
+                // Find the custom attribute 'custom:cityId'
+                const cityIdAttribute = userAttributes.find(attr => attr.Name === 'custom:cityId');
+    
+                // Return the value of 'cityId' if found, otherwise return null
+                return cityIdAttribute ? cityIdAttribute.Value : null;
+            } else {
+                return null;
+            }
+        } catch (error) {
+            throw new Error('An error occurred while retrieving cityId by email. The following exception occurred: ' + error.message);
+        }
+    }
+    
+
     public async registerUser(input: RegisterUserInput): Promise<boolean> {
         const { email, phoneNumber, name, password, zipCode } = input;
     

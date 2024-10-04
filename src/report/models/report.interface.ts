@@ -11,6 +11,6 @@ export interface Report {
     reportTypeId?: number;
     createdDate?: Date;
     resolvedDate?: Date;
-    cityId?: number;
     imageData?: string;
+    cityId?: number;
 }

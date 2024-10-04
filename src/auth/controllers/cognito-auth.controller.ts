@@ -1,5 +1,5 @@
 import { ISignUpResult } from 'amazon-cognito-identity-js';
-import { Body, Controller, HttpException, HttpStatus, Post, Res } from "@nestjs/common";
+import { Body, Controller, Get, HttpException, HttpStatus, Post, Query, Res } from "@nestjs/common";
 import { CognitoAuthService } from "../service/cognito-auth.service";
 import { Public } from "src/common/decorator/public.decorator";
 import { RegisterUserInput } from "../models/register-user-input.interface";
@@ -31,11 +31,24 @@ export class CognitoAuthController {
                 maxAge: 3600000,  // Cookie expiration time (1 hour in milliseconds)
             });
 
+            response.cookie('userEmail', body.email, {
+                httpOnly: false,
+                secure: true,
+                sameSite: 'none',
+                maxAge: 3600000,
+            });
+
             return true;
         } catch (error) {
             console.error(error);
             return false;
         }
+    }
+
+    @Public()
+    @Get('cityIdByEmail')
+    public async getCityIdByEmail(@Query('email') email: string): Promise<string> {
+        return await this.cognitoAuthService.getCityIdByEmail(email);
     }
 
     @Public()
