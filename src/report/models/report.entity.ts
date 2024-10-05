@@ -33,7 +33,7 @@ export class ReportEntity {
     @Column({ nullable: true })
     resolvedDate: Date;
     
-    @Column({ type: "longblob" })
+    @Column({ type: "longblob", nullable: true })
     imageData: string;
 
     @Column()

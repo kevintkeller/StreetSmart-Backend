@@ -117,6 +117,12 @@ export class ReportService {
             .getMany();
     }
 
+    public async getReportStatusById(reportStatusId: number): Promise<ReportStatus> {
+        return await this.reportStatusesRepository.createQueryBuilder('report_status_entity')
+            .where('report_status_entity.reportStatusId = :reportStatusId', { reportStatusId })
+            .getOne();
+    }
+
     public async deleteReportStatus(reportStatusId: number): Promise<boolean> {
         try {
             const result = await this.reportStatusesRepository.delete(reportStatusId);

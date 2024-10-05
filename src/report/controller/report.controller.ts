@@ -100,6 +100,14 @@ export class ReportController {
     }
 
     @Public()
+    @Get('get-report-status-by-id')
+    public async getReportStatusById(
+        @Query('reportStatusId') reportStatusId: number
+    ): Promise<ReportStatus> {
+        return await this.reportService.getReportStatusById(reportStatusId);
+    }
+
+    @Public()
     @Post('delete-report-status')
     public async deleteReportStatus(
         @Query('reportStatusId', ParseIntPipe) reportStatusId: number

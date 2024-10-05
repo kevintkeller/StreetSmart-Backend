@@ -84,4 +84,17 @@ export class CognitoAuthController {
         return this.cognitoAuthService.refreshTokens(input);
     }
 
+    @Public()
+    @Post('resend-confirmation-email')
+    public async resendConfirmationEmail(@Query('email') email: string): Promise<{ message: string }> {
+        await this.cognitoAuthService.resendConfirmationEmail(email);
+        return { message: 'Confirmation email resent successfully.' };
+    }
+
+    @Public()
+    @Post('resend-forgot-password-email')
+    public async resendForgotPasswordEmail(@Body() input: ForgotPasswordInput): Promise<{ message: string }> {
+        await this.cognitoAuthService.resendForgotPasswordEmail(input.email);
+        return { message: 'Forgot password email resent successfully.' };
+    }
 }

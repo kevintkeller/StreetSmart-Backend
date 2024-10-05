@@ -278,4 +278,39 @@ export class CognitoAuthService {
             });
         });
     }
+
+    public async resendConfirmationEmail(email: string): Promise<void> {
+        const username = await this.getUsernameByEmail(email);
+        const user = new CognitoUser({
+            Username: username,
+            Pool: this.userPool,
+        });
+
+        return new Promise((resolve, reject) => {
+            user.resendConfirmationCode((err) => {
+                if (err) {
+                    reject(new BadRequestException('Resend confirmation email failed: ' + err.message));
+                } else {
+                    resolve();
+                }
+            });
+        });
+    }
+
+    public async resendForgotPasswordEmail(email: string): Promise<void> {
+        const username = await this.getUsernameByEmail(email);
+        const user = new CognitoUser({
+            Username: username,
+            Pool: this.userPool,
+        });
+
+        return new Promise((resolve, reject) => {
+            user.forgotPassword({
+                onSuccess: () => {
+                    resolve();
+                },
+                onFailure: (err) => reject(new BadRequestException('Resend forgot password email failed: ' + err.message)),
+            });
+        });
+    }
 }
