@@ -16,32 +16,22 @@ export class CognitoAuthController {
 
     @Public()
     @Post('login')
-    public async login(@Body() body: { email: string; password: string }, @Res({ passthrough: true }) response: Response): Promise<boolean> {
+    public async login(@Body() body: { email: string; password: string }, @Res({ passthrough: true }) response: Response): Promise<{ userEmail: string }> {
         try {
             const session = await this.cognitoAuthService.authenticateUser(body.email, body.password);
-
-            // Assuming session contains the access token
             const jwt = session.getIdToken().getJwtToken();
 
             response.cookie('jwt', jwt, {
-                httpOnly: true,  // Cookie accessible only by the web server
-                //secure: process.env.NODE_ENV === 'production',  // Use secure cookies in production
+                httpOnly: true,
                 secure: true,
-                sameSite: 'none',  // Strict cookie policy
+                sameSite: 'none',
                 maxAge: 3600000,  // Cookie expiration time (1 hour in milliseconds)
             });
 
-            response.cookie('userEmail', body.email, {
-                httpOnly: false,
-                secure: true,
-                sameSite: 'none',
-                maxAge: 3600000,
-            });
-
-            return true;
+            return { userEmail: body.email };
         } catch (error) {
             console.error(error);
-            return false;
+            return { userEmail: null };
         }
     }
 
