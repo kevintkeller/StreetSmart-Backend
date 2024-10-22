@@ -1,15 +1,15 @@
 import { ReportTypes } from './../models/report-types.interface';
-import { Inject, Injectable, Post } from '@nestjs/common';
-import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { ReportEntity } from '../models/report.entity';
-import { DeleteResult, Double, getRepository, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Report } from '../models/report.interface';
-import { Observable, map, switchMap, catchError, throwError, from, EMPTY } from 'rxjs';
 import { ReportContactEntity } from '../models/report-contact.entity';
 import { ReportContact } from '../models/report-contact.interface';
 import { ReportTypesEntity } from '../models/report-types.entity';
 import { ReportStatusEntity } from '../models/report-status.entity';
 import { ReportStatus } from '../models/report-status.interface';
+import { TransformedReportContact } from '../models/transformed-report-contact.interface';
 
 @Injectable()
 export class ReportService {
@@ -36,6 +36,18 @@ export class ReportService {
         return this.reportRepository.createQueryBuilder('report_entity')
             .where('report_entity.reportId = :reportId', { reportId })
             .getOne();
+    }
+
+    public async getReportsByReportTypeId(reportTypeId: number): Promise<Report[]> {
+        return this.reportRepository.createQueryBuilder('report_entity')
+            .where('report_entity.reportTypeId = :reportTypeId', { reportTypeId })
+            .getMany();
+    }
+
+    public async getReportsByReportStatusId(reportStatusId: number): Promise<Report[]> {
+        return this.reportRepository.createQueryBuilder('report_entity')
+            .where('report_entity.reportStatusId = :reportStatusId', { reportStatusId })
+            .getMany();
     }
 
     public async deleteReportByReportId(reportId: number): Promise<boolean> {
@@ -101,6 +113,64 @@ export class ReportService {
         }
     }
 
+    public async deleteReportContactsByReportTypeId(reportTypeId: number): Promise<boolean> {
+        try {
+            const result = await this.reportContactRepository.createQueryBuilder('report_contact_entity')
+                .delete()
+                .from('report_contact_entity')
+                .where('report_contact_entity.reportTypeId = :reportTypeId', { reportTypeId })
+                .execute();  // Add .execute() to run the delete
+    
+            return result.affected > 0;
+        } catch (error) {
+            console.error('Error deleting report contact with the reportTypeId of ' + reportTypeId, error);
+            return false;
+        }
+    }
+
+    // TODO: refactor reportcontactentity and where it's used to have user id field on top of storing email to be a better primary key instead of trying to string match
+    public async deleteReportContactsByEmail(email: string): Promise<boolean> {
+        try {
+            const result = await this.reportContactRepository.createQueryBuilder('report_contact_entity')
+                .delete()
+                .from('report_contact_entity')
+                .where('report_contact_entity.email = :email', { email })
+                .execute();
+
+            return result.affected > 0;
+        } catch (error) {
+            console.error('Error deleting report contacts for the user: ' + email);
+            return false;
+        }
+    }
+
+    public async transformReportContacts(reportContactList: ReportContact[]): Promise<TransformedReportContact[]> {
+        try {
+            let transformedReportContacts: TransformedReportContact[] = [];
+            for (let reportContact of reportContactList) {
+                const reportTypeId: number = reportContact.reportTypeId;
+                const reportTypesObject: ReportTypes = await this.reportTypesRepository.createQueryBuilder('report_types_entity')
+                    .where('report_types_entity.reportTypeId = :reportTypeId', { reportTypeId })
+                    .getOne();
+                if (reportTypesObject) {
+                    const transformedReportContact: TransformedReportContact = {
+                        reportContactId: reportContact.reportContactId,
+                        email: reportContact.email,
+                        reportType: reportTypesObject.reportType,
+                        cityId: reportContact.cityId
+                    };
+                    transformedReportContacts.push(transformedReportContact);
+                } else {
+                    this.deleteReportContactsByReportTypeId(reportTypeId);
+                }
+            }
+            return transformedReportContacts;
+        } catch (error) {
+            console.error('Error transforming report contacts', error);
+            return [];
+        }
+    }
+
     public async createReportContact(reportContact: ReportContact): Promise<boolean> {
         try {
             const result = await this.reportContactRepository.save(reportContact);
@@ -142,5 +212,21 @@ export class ReportService {
             return false;
         }
     }
+
+    public async updateReportWithNewReportStatus(reportId: number, reportStatusId: number): Promise<boolean> {
+        try {
+            const result = await this.reportRepository.createQueryBuilder('report_entity')
+                .update()
+                .set({ reportStatusId })
+                .where("report_entity.reportId = :reportId", { reportId })
+                .execute();
+    
+            return result.affected > 0;
+        } catch (error) {
+            console.error('Error updating report with new report status', error);
+            return false;
+        }
+    }
+    
 
 }

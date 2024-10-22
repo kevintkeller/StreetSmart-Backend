@@ -5,6 +5,7 @@ import { Public } from 'src/common/decorator/public.decorator';
 import { ReportContact } from '../models/report-contact.interface';
 import { ReportTypes } from '../models/report-types.interface';
 import { ReportStatus } from '../models/report-status.interface';
+import { TransformedReportContact } from '../models/transformed-report-contact.interface';
 
 @Controller('report')
 export class ReportController {
@@ -36,6 +37,22 @@ export class ReportController {
     }
 
     @Public()
+    @Get('get-number-of-reports-by-report-type-id')
+    public async getNumberOfReportsByReportTypeId(
+        @Query('reportTypeId') reportTypeId: number
+    ): Promise<number> {
+        return (await this.reportService.getReportsByReportTypeId(reportTypeId)).length;
+    }
+
+    @Public()
+    @Get('get-number-of-reports-by-report-status-id')
+    public async getNumberOfReportsByReportStatusId(
+        @Query('reportStatusId') reportStatusId: number
+    ): Promise<number> {
+        return (await this.reportService.getReportsByReportStatusId(reportStatusId)).length;
+    }
+
+    @Public()
     @Delete(':reportId')
     public async deleteReportByReportId(
         @Query('reportId') reportId: string
@@ -60,11 +77,36 @@ export class ReportController {
     }
 
     @Public()
+    @Post('delete-report-contacts-by-report-type-id')
+    public async deleteReportContactsByReportTypeId(
+        @Query('reportTypeId') reportTypeId: number
+    ): Promise<boolean> {
+        return await this.reportService.deleteReportContactsByReportTypeId(reportTypeId);
+    }
+
+    @Public()
+    @Post('delete-report-contacts-by-email')
+    public async deleteReportContactsByEmail(
+        @Query('email') email: string
+    ): Promise<boolean> {
+        return await this.reportService.deleteReportContactsByEmail(email);
+    }
+
+    @Public()
     @Post('create-report-contact')
     public async createReportContact(
         @Body() body: ReportContact
     ): Promise<boolean> {
         return await this.reportService.createReportContact(body);
+    }
+
+    @Public()
+    @Post('transform-report-contacts')
+    public async transFormReportContacts(
+        @Body() reportContactList: ReportContact[]
+    ): Promise<TransformedReportContact[]> {
+        console.log(reportContactList);
+        return await this.reportService.transformReportContacts(reportContactList);
     }
 
     @Public()
@@ -121,5 +163,16 @@ export class ReportController {
         @Body() body: ReportStatus
     ): Promise<boolean> {
         return await this.reportService.createOrUpdateReportStatus(body);
+    }
+
+    @Public()
+    @Post('update-report-with-new-report-status')
+    public async updateReportWithNewReportStatus(
+        @Query('reportId') reportId: number,
+        @Query('reportStatusId') reportStatusId: number
+    ): Promise<boolean> {
+        console.log(reportId);
+        console.log(reportStatusId);
+        return await this.reportService.updateReportWithNewReportStatus(reportId, reportStatusId);
     }
 }
