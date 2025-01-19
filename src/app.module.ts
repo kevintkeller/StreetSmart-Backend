@@ -1,14 +1,15 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './user/user.module';
-import { UserEntity } from './user/models/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { ReportModule } from './report/report.module';
-import { ReportEntity } from './report/models/report.entity';
 import { MailerModule } from './mailer/mailer.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { TypedEventEmitter } from './event-emitter/typed-event-emitter.class';
+import { CookieMiddleware } from './auth/service/jwt-middleware.service';
 
 @Module({
   imports: [
@@ -17,7 +18,6 @@ import { MailerModule } from './mailer/mailer.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
-
         type: 'mysql',
         //url: process.env.DATABASE_URL,
         host: configService.get('DB_HOST'),
@@ -29,14 +29,19 @@ import { MailerModule } from './mailer/mailer.module';
         synchronize: true,
       }),
     }),
+    EventEmitterModule.forRoot(),
     UserModule,
     AuthModule,
     ReportModule,
-    MailerModule
+    MailerModule,
+    
   ],
   controllers: [AppController],
-  providers: [AppService, ConfigService],
+  providers: [AppService, ConfigService, TypedEventEmitter],
 })
 export class AppModule {
   constructor(private readonly configService: ConfigService) {}
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(CookieMiddleware).forRoutes('*');
+  }
 }
