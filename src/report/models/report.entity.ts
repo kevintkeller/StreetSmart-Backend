@@ -1,5 +1,4 @@
-import { UserEntity } from "src/user/models/user.entity";
-import { Column, Double, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn} from "typeorm";
+import { Column, Double, Entity, PrimaryGeneratedColumn} from "typeorm";
 
 
 @Entity()
@@ -20,14 +19,23 @@ export class ReportEntity {
     longitude: Double;
     
     @Column()
-    userId: number;
+    userEmail: string;
 
     @Column()
-    reportStatus: number;
+    reportStatusId: number;
 
-    @Column({
-        type: "longblob",
+    @Column()
+    reportTypeId: number;
 
-    })
+    @Column()
+    createdDate: Date;
+
+    @Column({ nullable: true })
+    resolvedDate: Date;
+    
+    @Column({ type: "longblob", nullable: true })
     imageData: string;
+
+    @Column()
+    cityId: number;
 }
